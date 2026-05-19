@@ -1,0 +1,1766 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>Hyundai Post Venta — Dashboard KPI 2026</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<style>
+:root{
+  --azul:#002C5F;--azul2:#1E6091;--celeste:#00AAD2;
+  --verde:#22c55e;--amarillo:#f59e0b;--rojo:#ef4444;--gris:#f1f5f9;
+  --borde:#e2e8f0;--texto:#1e293b;--texto2:#64748b;
+}
+*{box-sizing:border-box;margin:0;padding:0;font-family:'Segoe UI',Arial,sans-serif}
+body{background:#eef2f7;color:var(--texto);min-height:100vh}
+
+/* TOPBAR */
+.topbar{background:var(--azul);color:#fff;padding:0 24px;display:flex;align-items:center;justify-content:space-between;height:56px;position:sticky;top:0;z-index:100;box-shadow:0 2px 8px rgba(0,0,0,.25)}
+.topbar-left{display:flex;align-items:center;gap:12px}
+.topbar-logo{font-size:22px;font-weight:800;letter-spacing:1px;color:#fff}
+.topbar-sub{font-size:11px;color:#a0c4e8;letter-spacing:.5px;margin-top:1px}
+.topbar-controls{display:flex;align-items:center;gap:10px}
+.topbar select,.topbar input[type=month]{background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.25);color:#fff;border-radius:6px;padding:5px 10px;font-size:13px;cursor:pointer}
+.topbar select option{background:var(--azul);color:#fff}
+.btn{display:inline-flex;align-items:center;gap:6px;padding:6px 14px;border-radius:6px;border:none;cursor:pointer;font-size:13px;font-weight:600;transition:all .15s}
+.btn-primary{background:var(--celeste);color:#fff}
+.btn-primary:hover{background:#0090b5}
+.btn-danger{background:#ef4444;color:#fff;padding:4px 10px;font-size:12px}
+.btn-sm{padding:4px 10px;font-size:12px}
+.btn-outline{background:transparent;border:1px solid rgba(255,255,255,.4);color:#fff}
+.btn-outline:hover{background:rgba(255,255,255,.1)}
+
+/* TABS */
+.tabs{background:var(--azul2);display:flex;gap:2px;padding:0 16px;overflow-x:auto}
+.tab{padding:10px 16px;color:rgba(255,255,255,.7);cursor:pointer;font-size:13px;font-weight:500;border-bottom:3px solid transparent;white-space:nowrap;transition:all .15s}
+.tab:hover{color:#fff}
+.tab.active{color:#fff;border-bottom-color:var(--celeste)}
+
+/* MAIN */
+.main{max-width:1280px;margin:0 auto;padding:20px 16px}
+
+/* CARDS */
+.cards-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:14px;margin-bottom:20px}
+.card{background:#fff;border-radius:10px;padding:16px;box-shadow:0 1px 4px rgba(0,0,0,.08)}
+.card-title{font-size:11px;color:var(--texto2);text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px}
+.card-value{font-size:28px;font-weight:700;color:var(--azul)}
+.card-meta{font-size:12px;color:var(--texto2);margin-top:4px}
+.card.verde{border-left:4px solid var(--verde)}
+.card.amarillo{border-left:4px solid var(--amarillo)}
+.card.rojo{border-left:4px solid var(--rojo)}
+.card.neutro{border-left:4px solid var(--celeste)}
+
+/* SECTION */
+.section{background:#fff;border-radius:10px;padding:20px;box-shadow:0 1px 4px rgba(0,0,0,.08);margin-bottom:16px}
+.section-title{font-size:16px;font-weight:700;color:var(--azul);margin-bottom:4px;display:flex;align-items:center;gap:8px}
+.section-sub{font-size:12px;color:var(--texto2);margin-bottom:16px}
+
+/* FORM */
+.form-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:14px}
+.form-group{display:flex;flex-direction:column;gap:4px}
+.form-group label{font-size:12px;color:var(--texto2);font-weight:600}
+.form-group input,.form-group select{border:1px solid var(--borde);border-radius:6px;padding:8px 10px;font-size:14px;color:var(--texto);transition:border .15s}
+.form-group input:focus,.form-group select:focus{outline:none;border-color:var(--celeste)}
+.form-group .hint{font-size:11px;color:var(--texto2)}
+
+/* BADGE */
+.badge{display:inline-block;padding:2px 8px;border-radius:99px;font-size:11px;font-weight:600}
+.badge-verde{background:#dcfce7;color:#15803d}
+.badge-amarillo{background:#fef3c7;color:#92400e}
+.badge-rojo{background:#fee2e2;color:#991b1b}
+.badge-gris{background:#f1f5f9;color:#475569}
+
+/* TABLE */
+.table-wrap{overflow-x:auto}
+table{width:100%;border-collapse:collapse;font-size:13px}
+th{background:var(--azul);color:#fff;padding:8px 12px;text-align:left;font-weight:600}
+td{padding:8px 12px;border-bottom:1px solid var(--borde)}
+tr:hover td{background:#f8fafc}
+tr.highlight td{background:#eff6ff}
+
+/* PROGRESS */
+.progress-bar{height:8px;border-radius:4px;background:#e2e8f0;overflow:hidden;margin-top:4px}
+.progress-fill{height:100%;border-radius:4px;transition:width .3s}
+
+/* ALERT */
+.alert{border-radius:8px;padding:12px 16px;margin-bottom:12px;font-size:13px}
+.alert-warn{background:#fef3c7;border:1px solid #f59e0b;color:#92400e}
+.alert-danger{background:#fee2e2;border:1px solid #ef4444;color:#991b1b}
+.alert-success{background:#dcfce7;border:1px solid #22c55e;color:#15803d}
+.alert-info{background:#e0f2fe;border:1px solid #0ea5e9;color:#075985}
+
+/* RESULT BOX */
+.result-box{background:var(--gris);border-radius:8px;padding:14px;display:flex;align-items:center;justify-content:space-between;margin-top:12px}
+.result-label{font-size:12px;color:var(--texto2);font-weight:600}
+.result-value{font-size:22px;font-weight:800;color:var(--azul)}
+
+/* PUNTAJE */
+.puntaje-display{text-align:center;padding:20px}
+.puntaje-num{font-size:56px;font-weight:800;color:var(--azul);line-height:1}
+.puntaje-label{font-size:13px;color:var(--texto2);margin-top:6px}
+.rebate-big{font-size:36px;font-weight:800;margin-top:8px}
+
+/* CHART CONTAINER */
+.chart-container{position:relative;height:260px}
+
+/* SWITCH */
+.switch-group{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.switch-btn{padding:6px 14px;border-radius:6px;border:1px solid var(--borde);background:#fff;cursor:pointer;font-size:12px;font-weight:600;color:var(--texto2);transition:all .15s}
+.switch-btn.on{background:var(--verde);color:#fff;border-color:var(--verde)}
+.switch-btn.off{background:#fee2e2;color:#991b1b;border-color:#ef4444}
+
+/* HIDDEN */
+.hidden{display:none!important}
+
+/* MODAL */
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:200;display:flex;align-items:center;justify-content:center}
+.modal{background:#fff;border-radius:12px;padding:24px;width:360px;max-width:95vw}
+.modal h3{margin-bottom:16px;color:var(--azul)}
+
+/* RESPONSIVE */
+@media(max-width:640px){
+  .topbar{flex-wrap:wrap;height:auto;padding:10px 16px;gap:8px}
+  .topbar-controls{flex-wrap:wrap}
+  .cards-grid{grid-template-columns:1fr 1fr}
+  .form-grid{grid-template-columns:1fr}
+}
+
+/* DIVIDER */
+.divider{border:none;border-top:1px solid var(--borde);margin:16px 0}
+
+/* LLAVE */
+.llave-row{display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid var(--borde)}
+.llave-row:last-child{border:none}
+.llave-label{flex:1;font-size:13px;font-weight:600}
+.llave-desc{font-size:11px;color:var(--texto2)}
+</style>
+</head>
+<body>
+
+<!-- TOPBAR -->
+<div class="topbar">
+  <div class="topbar-left">
+    <div>
+      <div class="topbar-logo">⊞ HYUNDAI</div>
+      <div class="topbar-sub">Post Venta — Dashboard KPI 2026</div>
+    </div>
+  </div>
+  <div class="topbar-controls">
+    <select id="sel-sucursal" onchange="app.cambiarSucursal(this.value)"></select>
+    <input type="month" id="sel-mes" value="2026-05" onchange="app.cambiarMes(this.value)"/>
+    <button class="btn btn-outline" onclick="app.openModalSucursal()">+ Sucursal</button>
+    <button class="btn btn-outline" onclick="app.guardarDatos()">💾 Guardar</button>
+  </div>
+</div>
+
+<!-- TABS -->
+<div class="tabs">
+  <div class="tab active" onclick="app.setTab('dashboard')">📊 Dashboard</div>
+  <div class="tab" onclick="app.setTab('pilar1')">🔧 Pilar 1 · Excelencia Op.</div>
+  <div class="tab" onclick="app.setTab('pilar2')">📦 Pilar 2 · DMI</div>
+  <div class="tab" onclick="app.setTab('pilar3')">🚗 Pilar 3 · D&P / Seguros</div>
+  <div class="tab" onclick="app.setTab('pilar4')">⭐ Pilar 4 · NPS</div>
+  <div class="tab" onclick="app.setTab('servicecars')">🔑 Service Cars</div>
+  <div class="tab" onclick="app.setTab('capacitacion')">📚 Capacitación</div>
+  <div class="tab" onclick="app.setTab('metas')">🎯 Metas 2026</div>
+  <div class="tab" onclick="app.setTab('clearmechanic')">🔧 Clear Mechanic</div>
+  <div class="tab" onclick="app.setTab('historico')">📈 Histórico</div>
+</div>
+
+<!-- MAIN -->
+<div class="main">
+
+<!-- ═══════════ DASHBOARD ═══════════ -->
+<div id="tab-dashboard">
+  <div class="cards-grid" id="summary-cards"></div>
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px" id="dash-charts-row">
+    <div class="section">
+      <div class="section-title">Puntaje Pilar 1 — Excelencia Operacional</div>
+      <div class="chart-container"><canvas id="chart-radial"></canvas></div>
+    </div>
+    <div class="section">
+      <div class="section-title">Estado General de KPIs</div>
+      <div id="estado-general"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════ PILAR 1 ═══════════ -->
+<div id="tab-pilar1" class="hidden">
+  <div class="section">
+    <div class="section-title">🔧 Pilar 1 — Excelencia Operacional</div>
+    <div class="section-sub">Rebate 1 según puntaje ponderado. Requiere 2 llaves de entrada.</div>
+
+    <div class="alert alert-warn">
+      <strong>⚠ Llaves de entrada obligatorias.</strong> Si alguna no se cumple, el Pilar 1 va a 0% aunque se alcance el puntaje.
+    </div>
+
+    <div style="margin-bottom:16px">
+      <div class="llave-row">
+        <div>
+          <div class="llave-label">🔑 Llave 1: Envío de información</div>
+          <div class="llave-desc">Información enviada al 3er día hábil del mes</div>
+        </div>
+        <div class="switch-group">
+          <button class="switch-btn" id="btn-llave1-si" onclick="app.setLlave(1,true)">✓ Enviada</button>
+          <button class="switch-btn off" id="btn-llave1-no" onclick="app.setLlave(1,false)">✗ No enviada</button>
+        </div>
+      </div>
+      <div class="llave-row">
+        <div>
+          <div class="llave-label">🔑 Llave 2: NPS mínimo</div>
+          <div class="llave-desc">NPS del dealer ≥ 75%</div>
+        </div>
+        <div class="switch-group">
+          <button class="switch-btn" id="btn-llave2-si" onclick="app.setLlave(2,true)">✓ Cumple</button>
+          <button class="switch-btn off" id="btn-llave2-no" onclick="app.setLlave(2,false)">✗ No cumple</button>
+        </div>
+      </div>
+    </div>
+
+    <hr class="divider"/>
+    <div class="form-grid">
+      <div class="form-group">
+        <label>1.1 Venta de Repuestos <span class="badge badge-gris">Peso 50%</span></label>
+        <input type="number" id="p1_venta_rep" min="0" max="200" placeholder="% cumplimiento" oninput="app.calcP1()"/>
+        <div class="hint" id="hint-1-1"></div>
+      </div>
+      <div class="form-group">
+        <label>1.2 Paso Vehicular <span class="badge badge-gris">Peso 20%</span></label>
+        <div style="display:flex;gap:8px;align-items:center;margin-bottom:4px">
+          <div id="p1-pv-meta-chip" style="font-size:11px;background:#e0f2fe;color:#075985;padding:3px 8px;border-radius:4px;white-space:nowrap"></div>
+        </div>
+        <div style="display:flex;gap:8px">
+          <input type="number" id="p1_paso_veh_real" min="0" placeholder="PV real (unid.)" oninput="app.calcP1PVReal()" style="width:50%"/>
+          <input type="number" id="p1_paso_veh" min="0" max="200" placeholder="% o auto↑" oninput="app.calcP1()" style="width:50%"/>
+        </div>
+        <div class="hint" id="hint-1-2">Ingrese PV real para calcular % automáticamente, o el % directamente</div>
+      </div>
+      <div class="form-group">
+        <label>1.3 Campañas de Servicio <span class="badge badge-gris">Peso 10%</span></label>
+        <input type="number" id="p1_campanas" min="0" max="200" placeholder="% cumplimiento" oninput="app.calcP1()"/>
+        <div class="hint" id="hint-1-3"></div>
+      </div>
+      <div class="form-group">
+        <label>1.4 MPP &gt;10% del PV <span class="badge badge-gris">Peso 20%</span></label>
+        <input type="number" id="p1_mpp" min="0" max="200" placeholder="% cumplimiento" oninput="app.calcP1()"/>
+        <div class="hint" id="hint-1-4"></div>
+      </div>
+    </div>
+
+    <div class="result-box" style="margin-top:16px;flex-wrap:wrap;gap:12px">
+      <div class="puntaje-display" style="padding:10px">
+        <div class="puntaje-num" id="p1-puntaje-num">—</div>
+        <div class="puntaje-label">Puntaje ponderado</div>
+      </div>
+      <div style="text-align:center">
+        <div class="result-label">Tramo</div>
+        <div class="result-value" id="p1-tramo">—</div>
+      </div>
+      <div style="text-align:center">
+        <div class="result-label">Rebate 1</div>
+        <div class="rebate-big" id="p1-rebate" style="color:var(--verde)">—</div>
+      </div>
+      <div style="text-align:center">
+        <div class="result-label">Estado Llaves</div>
+        <div id="p1-llave-estado" style="margin-top:4px"></div>
+      </div>
+    </div>
+
+    <hr class="divider"/>
+    <div class="section-title" style="font-size:13px;margin-bottom:8px">Tabla de Rebate</div>
+    <div class="table-wrap">
+    <table>
+      <thead><tr><th>Puntaje</th><th>Tramo</th><th>Rebate 1</th></tr></thead>
+      <tbody id="tabla-p1-rebate"></tbody>
+    </table>
+    </div>
+    <hr class="divider"/>
+    <div class="section-title" style="font-size:13px;margin-bottom:8px">Tabla de Puntaje por Sub-pilar</div>
+    <div class="table-wrap">
+    <table>
+      <thead><tr><th>Sub-pilar 1.1 / 1.2 / 1.4</th><th>Puntaje</th><th>Sub-pilar 1.3 Campañas</th><th>Puntaje</th></tr></thead>
+      <tbody>
+        <tr><td>&gt;105%</td><td>5</td><td>100%</td><td>5</td></tr>
+        <tr><td>97% – 105%</td><td>4</td><td>91% – 99%</td><td>4</td></tr>
+        <tr><td>90% – 96%</td><td>3</td><td>81% – 90%</td><td>3</td></tr>
+        <tr><td>87% – 89%</td><td>2</td><td>75% – 80%</td><td>2</td></tr>
+        <tr><td>85% – 86%</td><td>1</td><td>70% – 74%</td><td>1</td></tr>
+        <tr><td>&lt;85%</td><td>0</td><td>&lt;70%</td><td>0</td></tr>
+      </tbody>
+    </table>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════ PILAR 2 ═══════════ -->
+<div id="tab-pilar2" class="hidden">
+  <div class="section">
+    <div class="section-title">📦 Pilar 2 — Negocio de Repuestos por DMI</div>
+    <div class="section-sub">Rebate 2 = 2% al 100% de cumplimiento meta por DMI. Sin llave de entrada obligatoria.</div>
+
+    <div class="alert alert-info">
+      ℹ Los VOR de baja rotación (categorías C y D) generan un cargo del <strong>10% al dealer</strong>, descontado del Rebate 2.
+    </div>
+
+    <div class="form-grid">
+      <div class="form-group">
+        <label>Cumplimiento Meta DMI (%)</label>
+        <input type="number" id="p2_cumpl" min="0" max="200" placeholder="ej. 100" oninput="app.calcP2()"/>
+        <div class="hint">100% = Rebate 2% · Menos del 100% = Rebate 0%</div>
+      </div>
+      <div class="form-group">
+        <label>VOR Baja Rotación (C-D) — Monto cargo</label>
+        <input type="number" id="p2_vor_cargo" min="0" placeholder="$ monto descuento" oninput="app.calcP2()"/>
+        <div class="hint">Este valor se descuenta del Rebate 2 a pagar</div>
+      </div>
+      <div class="form-group">
+        <label>Facturación del Mes ($)</label>
+        <input type="number" id="p2_facturacion" min="0" placeholder="$ facturación total" oninput="app.calcP2()"/>
+        <div class="hint">Para calcular el monto en pesos del rebate</div>
+      </div>
+    </div>
+
+    <div class="result-box" style="flex-wrap:wrap;gap:16px">
+      <div>
+        <div class="result-label">Cumplimiento</div>
+        <div class="result-value" id="p2-cumpl-badge">—</div>
+      </div>
+      <div>
+        <div class="result-label">Rebate 2</div>
+        <div class="rebate-big" id="p2-rebate" style="color:var(--verde)">—</div>
+      </div>
+      <div>
+        <div class="result-label">Monto Rebate</div>
+        <div class="result-value" id="p2-monto">—</div>
+      </div>
+      <div>
+        <div class="result-label">Desc. VOR C-D</div>
+        <div class="result-value" id="p2-vor-desc" style="color:var(--rojo)">—</div>
+      </div>
+      <div>
+        <div class="result-label">Rebate Neto</div>
+        <div class="rebate-big" id="p2-neto" style="color:var(--celeste)">—</div>
+      </div>
+    </div>
+
+    <hr class="divider"/>
+    <div class="table-wrap">
+    <table>
+      <thead><tr><th>Cumplimiento DMI</th><th>Pago Rebate 2</th></tr></thead>
+      <tbody>
+        <tr class="highlight"><td>100%</td><td>2%</td></tr>
+        <tr><td>0% – 99%</td><td>0%</td></tr>
+      </tbody>
+    </table>
+    </div>
+
+    <hr class="divider"/>
+    <div class="section-title" style="font-size:13px;margin-bottom:8px">Consideraciones adicionales</div>
+    <div class="alert alert-warn">
+      <strong>Descuentos especiales:</strong> Toda solicitud de precio especial o descuento adicional debe canalizarse al KAM y contar con aprobación del Gerente de Repuestos. Si se otorga descuento, se excluye del cálculo del rebate.
+    </div>
+    <div class="alert alert-warn">
+      <strong>Ventas por volumen sobre $4MM:</strong> Deben ser analizadas por el KAM en conjunto con el Gerente de Repuestos.
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════ PILAR 3 ═══════════ -->
+<div id="tab-pilar3" class="hidden">
+  <div class="section">
+    <div class="section-title">🚗 Pilar 3 — Negocio D&P / Compañías de Seguros</div>
+    <div class="section-sub">Rebate 3 = 10% por canal al cumplir 100% de la meta. Sin llave de entrada obligatoria.</div>
+
+    <div class="form-grid">
+      <div class="form-group">
+        <label>Portal Cía. de Seguros — Cumplimiento (%)</label>
+        <input type="number" id="p3_poliza" min="0" max="200" placeholder="% cumplimiento" oninput="app.calcP3()"/>
+        <div class="hint">100% → Rebate 10% | 0–99% → Rebate 0%</div>
+      </div>
+      <div class="form-group">
+        <label>D&P Carga Libre — Cumplimiento (%)</label>
+        <input type="number" id="p3_dyp" min="0" max="200" placeholder="% cumplimiento" oninput="app.calcP3()"/>
+        <div class="hint">100% → Rebate 10% | 0–99% → Rebate 0%</div>
+      </div>
+      <div class="form-group">
+        <label>Facturación Cía. Seguros ($)</label>
+        <input type="number" id="p3_fact_seguros" min="0" placeholder="$ facturación" oninput="app.calcP3()"/>
+      </div>
+      <div class="form-group">
+        <label>Facturación D&P ($)</label>
+        <input type="number" id="p3_fact_dyp" min="0" placeholder="$ facturación" oninput="app.calcP3()"/>
+      </div>
+    </div>
+
+    <div class="result-box" style="flex-wrap:wrap;gap:16px">
+      <div>
+        <div class="result-label">Rebate Cía. Seguros</div>
+        <div class="rebate-big" id="p3-reb-seguros" style="color:var(--verde)">—</div>
+      </div>
+      <div>
+        <div class="result-label">Monto Seguros</div>
+        <div class="result-value" id="p3-monto-seguros">—</div>
+      </div>
+      <div>
+        <div class="result-label">Rebate D&P</div>
+        <div class="rebate-big" id="p3-reb-dyp" style="color:var(--verde)">—</div>
+      </div>
+      <div>
+        <div class="result-label">Monto D&P</div>
+        <div class="result-value" id="p3-monto-dyp">—</div>
+      </div>
+      <div>
+        <div class="result-label">Rebate Total Pilar 3</div>
+        <div class="rebate-big" id="p3-total" style="color:var(--celeste)">—</div>
+      </div>
+    </div>
+
+    <hr class="divider"/>
+    <div class="table-wrap">
+    <table>
+      <thead><tr><th>Canal</th><th>Cumplimiento</th><th>Rebate 3</th></tr></thead>
+      <tbody>
+        <tr class="highlight"><td>Portal Cía. Seguros</td><td>100%</td><td>10%</td></tr>
+        <tr><td>Portal Cía. Seguros</td><td>0–99%</td><td>0%</td></tr>
+        <tr class="highlight"><td>D&P Carga Libre</td><td>100%</td><td>10%</td></tr>
+        <tr><td>D&P Carga Libre</td><td>0–99%</td><td>0%</td></tr>
+      </tbody>
+    </table>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════ PILAR 4 ═══════════ -->
+<div id="tab-pilar4" class="hidden">
+  <div class="section">
+    <div class="section-title">⭐ Pilar 4 — Satisfacción de Clientes NPS</div>
+    <div class="section-sub">Rebate 4 = 0,25% de facturación auto al cumplir meta NPS ≥ 85,5%. Piso mínimo NPS 80%.</div>
+
+    <div class="alert alert-info">
+      🔑 <strong>Llave de entrada Pilar 4:</strong> Tasa de respuesta de encuesta ≥ 35%. Si no se cumple, no se activa el rebate.
+    </div>
+
+    <div class="form-grid">
+      <div class="form-group">
+        <label>NPS Post Venta (%)</label>
+        <input type="number" id="p4_nps" min="0" max="100" step="0.1" placeholder="ej. 87.5" oninput="app.calcP4()"/>
+        <div class="hint">Meta: 85,5% · Piso mínimo: 80%</div>
+      </div>
+      <div class="form-group">
+        <label>Tasa de Respuesta Encuesta (%)</label>
+        <input type="number" id="p4_tasa_resp" min="0" max="100" step="0.1" placeholder="ej. 40" oninput="app.calcP4()"/>
+        <div class="hint">Mínimo requerido: 35%</div>
+      </div>
+      <div class="form-group">
+        <label>Facturación del Mes ($)</label>
+        <input type="number" id="p4_facturacion" min="0" placeholder="$ facturación auto" oninput="app.calcP4()"/>
+        <div class="hint">Base para calcular el 0,25% de rebate</div>
+      </div>
+      <div class="form-group">
+        <label>N° Encuestas Respondidas</label>
+        <input type="number" id="p4_n_resp" min="0" placeholder="nro." oninput="app.calcP4()"/>
+      </div>
+      <div class="form-group">
+        <label>N° Total Encuestas Enviadas</label>
+        <input type="number" id="p4_n_total" min="0" placeholder="nro." oninput="app.calcP4()"/>
+      </div>
+    </div>
+
+    <div class="result-box" style="flex-wrap:wrap;gap:16px">
+      <div class="puntaje-display" style="padding:10px">
+        <div class="puntaje-num" id="p4-nps-num">—</div>
+        <div class="puntaje-label">NPS actual</div>
+      </div>
+      <div style="text-align:center">
+        <div class="result-label">Tasa Respuesta</div>
+        <div class="result-value" id="p4-tasa-show">—</div>
+      </div>
+      <div style="text-align:center">
+        <div class="result-label">Estado Llave</div>
+        <div id="p4-llave-estado" style="margin-top:6px"></div>
+      </div>
+      <div style="text-align:center">
+        <div class="result-label">Rebate 4</div>
+        <div class="rebate-big" id="p4-rebate" style="color:var(--verde)">—</div>
+      </div>
+      <div style="text-align:center">
+        <div class="result-label">Monto Rebate</div>
+        <div class="result-value" id="p4-monto">—</div>
+      </div>
+    </div>
+
+    <div id="p4-alertas" style="margin-top:12px"></div>
+
+    <hr class="divider"/>
+    <div class="table-wrap">
+    <table>
+      <thead><tr><th>Condición NPS</th><th>Pago Rebate 4</th></tr></thead>
+      <tbody>
+        <tr class="highlight"><td>NPS ≥ 85,5% (con tasa respuesta ≥ 35%)</td><td>0,25% de facturación auto</td></tr>
+        <tr><td>NPS &lt; 85,5%</td><td>No se paga</td></tr>
+        <tr><td>Tasa respuesta &lt; 35%</td><td>No se paga (llave cerrada)</td></tr>
+        <tr><td>NPS &lt; 80% (piso mínimo)</td><td>No se paga</td></tr>
+      </tbody>
+    </table>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════ SERVICE CARS ═══════════ -->
+<div id="tab-servicecars" class="hidden">
+  <div class="section">
+    <div class="section-title">🔑 Service Cars — Autos de Reemplazo</div>
+    <div class="section-sub">Mínimo: 1 auto por cada 100 Pasos Vehiculares (PV). El incumplimiento penaliza las metas en 20%.</div>
+
+    <div class="alert alert-danger">
+      ⚠ <strong>Incumplimiento penaliza metas en 20%.</strong> El dealer no recibe reembolso del importador si no cumple la cantidad mínima obligatoria.
+    </div>
+
+    <div class="form-grid">
+      <div class="form-group">
+        <label>Pasos Vehiculares (PV) del Mes</label>
+        <input type="number" id="sc_pv" min="0" placeholder="ej. 120" oninput="app.calcSC()"/>
+        <div class="hint">Total de vehículos que pasaron por el taller este mes</div>
+      </div>
+      <div class="form-group">
+        <label>Autos de Reemplazo Disponibles</label>
+        <input type="number" id="sc_autos" min="0" placeholder="ej. 2" oninput="app.calcSC()"/>
+        <div class="hint">Autos base del dealer (no reembolsables)</div>
+      </div>
+      <div class="form-group">
+        <label>Días con Auto Adicional Arrendado</label>
+        <input type="number" id="sc_dias_adicional" min="0" placeholder="ej. 5" oninput="app.calcSC()"/>
+        <div class="hint">Para calcular aporte del importador ($30.000/día)</div>
+      </div>
+      <div class="form-group">
+        <label>Modelo del Auto Base</label>
+        <select id="sc_modelo" onchange="app.calcSC()">
+          <option value="">Seleccionar...</option>
+          <option value="Grand I10 / I20 / Accent">Grand I10 / I20 / Accent — 5% descuento</option>
+          <option value="Venue / Creta / Kona / Tucson">Venue / Creta / Creta Grand / Kona / Tucson — 6%</option>
+          <option value="HEV: Kona / Tucson / Santa Fe / Palisade">HEV: Kona / Tucson / Santa Fe / Palisade — 7%</option>
+          <option value="Accent MT Plus">Accent MT Plus — Sin descuento</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="result-box" style="flex-wrap:wrap;gap:16px">
+      <div>
+        <div class="result-label">Mínimo Requerido</div>
+        <div class="result-value" id="sc-minimo">—</div>
+      </div>
+      <div>
+        <div class="result-label">Autos Disponibles</div>
+        <div class="result-value" id="sc-disponibles">—</div>
+      </div>
+      <div>
+        <div class="result-label">Diferencia</div>
+        <div class="result-value" id="sc-diferencia">—</div>
+      </div>
+      <div>
+        <div class="result-label">Estado</div>
+        <div id="sc-estado" style="margin-top:6px"></div>
+      </div>
+      <div>
+        <div class="result-label">Aporte Importador (adicionales)</div>
+        <div class="result-value" id="sc-aporte">—</div>
+      </div>
+    </div>
+
+    <div id="sc-alertas" style="margin-top:12px"></div>
+
+    <hr class="divider"/>
+    <div class="section-title" style="font-size:13px;margin-bottom:8px">Tabla de mínimos requeridos</div>
+    <div class="table-wrap">
+    <table>
+      <thead><tr><th>PV Mensual</th><th>Autos Mínimos Requeridos</th></tr></thead>
+      <tbody>
+        <tr><td>1 – 100</td><td>1 (mínimo absoluto)</td></tr>
+        <tr><td>101 – 200</td><td>2</td></tr>
+        <tr><td>201 – 300</td><td>3</td></tr>
+        <tr><td>301 – 400</td><td>4</td></tr>
+        <tr><td>401+</td><td>ceil(PV / 100)</td></tr>
+      </tbody>
+    </table>
+    </div>
+
+    <hr class="divider"/>
+    <div class="section-title" style="font-size:13px;margin-bottom:8px">Condiciones para facilitar auto al cliente (Ley Pro Consumidor)</div>
+    <ul style="margin-left:20px;font-size:13px;color:var(--texto2);line-height:2">
+      <li>Vehículo del cliente con garantía legal vigente (primeros 6 meses)</li>
+      <li>Aprobación formal del inicio de la reparación</li>
+      <li>5 días hábiles transcurridos desde la aprobación (no aplica para Recall)</li>
+      <li>Recall: el vehículo NO puede entregarse al cliente hasta completar la reparación</li>
+    </ul>
+  </div>
+</div>
+
+<!-- ═══════════ CAPACITACION ═══════════ -->
+<div id="tab-capacitacion" class="hidden">
+  <div class="section">
+    <div class="section-title">📚 Capacitación — 100% de cumplimiento obligatorio</div>
+    <div class="section-sub">El incumplimiento genera cobros automáticos: UF 3 (presencial) · UF 1,5 (online) por persona no certificada.</div>
+
+    <div class="alert alert-warn">
+      ⚠ Los costos de inasistencia se <strong>descuentan del Rebate 1</strong> del período.
+    </div>
+
+    <div class="form-grid">
+      <div class="form-group">
+        <label>Cursos Presenciales — % Asistencia</label>
+        <input type="number" id="cap_pres" min="0" max="100" step="0.1" placeholder="% ej. 95" oninput="app.calcCap()"/>
+        <div class="hint">Meta: 100% · Costo no asistencia: UF 3 + IVA / persona</div>
+      </div>
+      <div class="form-group">
+        <label>Personas sin asistir (presencial)</label>
+        <input type="number" id="cap_pres_falt" min="0" placeholder="ej. 2" oninput="app.calcCap()"/>
+      </div>
+      <div class="form-group">
+        <label>Cursos Online — % Completados</label>
+        <input type="number" id="cap_online" min="0" max="100" step="0.1" placeholder="% ej. 88" oninput="app.calcCap()"/>
+        <div class="hint">Meta: 100% · Costo no completar: UF 1,5 + IVA / persona</div>
+      </div>
+      <div class="form-group">
+        <label>Personas sin completar (online)</label>
+        <input type="number" id="cap_online_falt" min="0" placeholder="ej. 1" oninput="app.calcCap()"/>
+      </div>
+    </div>
+
+    <hr class="divider"/>
+    <div class="section-title" style="font-size:13px;margin-bottom:8px">iDealer</div>
+    <div class="form-grid">
+      <div class="form-group">
+        <label>Visualizaciones iDealer</label>
+        <input type="number" id="cap_id_viz" min="0" placeholder="ej. 22" oninput="app.calcCap()"/>
+        <div class="hint">Meta: 20 visualizaciones</div>
+      </div>
+      <div class="form-group">
+        <label>Compartidos iDealer</label>
+        <input type="number" id="cap_id_comp" min="0" placeholder="ej. 18" oninput="app.calcCap()"/>
+        <div class="hint">Meta: 20 compartidos</div>
+      </div>
+    </div>
+
+    <hr class="divider"/>
+    <div class="section-title" style="font-size:13px;margin-bottom:8px">Certificaciones HMC</div>
+    <div class="form-grid">
+      <div class="form-group">
+        <label>Certificación Nivel 1 (Certified Lv.1) — %</label>
+        <input type="number" id="cap_cert1" min="0" max="100" step="0.1" placeholder="% personal certificado" oninput="app.calcCap()"/>
+        <div class="hint">Meta: 90% del personal</div>
+      </div>
+      <div class="form-group">
+        <label>Certificación Nivel 2 (Expert Lv.2) — %</label>
+        <input type="number" id="cap_cert2" min="0" max="100" step="0.1" placeholder="% personal certificado" oninput="app.calcCap()"/>
+        <div class="hint">Meta: 70% del personal</div>
+      </div>
+      <div class="form-group">
+        <label>Valor UF del Mes ($)</label>
+        <input type="number" id="cap_uf" min="0" step="0.01" placeholder="ej. 38500" oninput="app.calcCap()"/>
+        <div class="hint">Para calcular costo en pesos de las multas</div>
+      </div>
+    </div>
+
+    <div class="result-box" style="flex-wrap:wrap;gap:16px">
+      <div>
+        <div class="result-label">Estado Presencial</div>
+        <div id="cap-estado-pres" style="margin-top:6px"></div>
+      </div>
+      <div>
+        <div class="result-label">Estado Online</div>
+        <div id="cap-estado-online" style="margin-top:6px"></div>
+      </div>
+      <div>
+        <div class="result-label">iDealer</div>
+        <div id="cap-estado-id" style="margin-top:6px"></div>
+      </div>
+      <div>
+        <div class="result-label">Cert. Lv.1</div>
+        <div id="cap-estado-cert1" style="margin-top:6px"></div>
+      </div>
+      <div>
+        <div class="result-label">Cert. Lv.2</div>
+        <div id="cap-estado-cert2" style="margin-top:6px"></div>
+      </div>
+      <div>
+        <div class="result-label">Multa Estimada (sin IVA)</div>
+        <div class="result-value" id="cap-multa" style="color:var(--rojo)">—</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════ METAS 2026 ═══════════ -->
+<div id="tab-metas" class="hidden">
+
+  <!-- Paso Vehicular por sucursal -->
+  <div class="section">
+    <div class="section-title">🚗 Meta Paso Vehicular 2026 — Por Sucursal</div>
+    <div class="section-sub">Unidades mensuales por local. Fuente: Plan anual Hyundai.</div>
+    <div class="table-wrap">
+    <table id="tabla-meta-pv-sucursal"></table>
+    </div>
+  </div>
+
+  <!-- Paso Vehicular red total -->
+  <div class="section">
+    <div class="section-title">🌐 Meta Paso Vehicular 2026 — Red Total Hyundai</div>
+    <div class="section-sub">Comparativo 2025 vs 2026 — unidades de toda la red.</div>
+    <div class="table-wrap">
+    <table id="tabla-meta-pv-red"></table>
+    </div>
+  </div>
+
+  <!-- Metas Repuestos -->
+  <div class="section">
+    <div class="section-title">📦 Meta Compra Repuestos 2026 — Grupo Curifor (Total)</div>
+    <div class="section-sub">Montos de compra mensuales en pesos para el grupo completo (Hyundai + JAC + Emergentes).</div>
+    <div class="table-wrap">
+    <table id="tabla-meta-repuestos"></table>
+    </div>
+    <div class="alert alert-info" style="margin-top:12px">
+      ℹ Estos montos corresponden al <strong>total del grupo Curifor</strong>. Para el cálculo de Pilar 2 (DMI) por sucursal, utilice la meta individual asignada por el KAM.
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════ CLEAR MECHANIC ═══════════ -->
+<div id="tab-clearmechanic" class="hidden">
+
+  <div class="alert alert-danger" style="margin-bottom:16px">
+    ⚠ <strong>Licencia USD $440</strong> — Se cobra automáticamente si NO se cumplen los 3 KPIs:<br>
+    <strong>100% Envío · 50% Cotización · 15% Aprobación</strong><br>
+    <span style="font-size:11px">Nota: Las OT notificadas como "Paso Vehicular" excluyen las informadas como DESAB-PINT</span>
+  </div>
+
+  <!-- Tabla consolidada todas las sucursales -->
+  <div class="section">
+    <div class="section-title">📋 Resumen Mensual — Todas las Sucursales</div>
+    <div class="section-sub">Vista consolidada del uso de Clear Mechanic por dealer/sucursal.</div>
+    <div class="table-wrap" id="cm-tabla-consolidada"></div>
+    <div id="cm-resumen-licencias" style="margin-top:12px;display:flex;gap:12px;flex-wrap:wrap"></div>
+  </div>
+
+  <!-- Formulario sucursal actual -->
+  <div class="section">
+    <div class="section-title">✏️ Ingresar Datos — <span id="cm-suc-nombre"></span></div>
+    <div class="section-sub">Ingrese los datos del mes seleccionado. Las OT DESAB-PINT ya deben estar excluidas del conteo.</div>
+
+    <div class="form-grid">
+      <div class="form-group">
+        <label>OT Notificadas (Total)</label>
+        <input type="number" id="cm_ot" min="0" placeholder="ej. 110" oninput="app.calcCM()"/>
+        <div class="hint">Total de órdenes de trabajo notificadas en Clear Mechanic (sin DESAB-PINT)</div>
+      </div>
+      <div class="form-group">
+        <label>OT Enviadas <span class="badge badge-rojo">KPI ≥ 100%</span></label>
+        <input type="number" id="cm_envios" min="0" placeholder="ej. 102" oninput="app.calcCM()"/>
+        <div class="hint">Mínimo: 100% de las OT deben enviarse</div>
+      </div>
+      <div class="form-group">
+        <label>OT Cotizadas <span class="badge badge-amarillo">KPI ≥ 50%</span></label>
+        <input type="number" id="cm_cotizacion" min="0" placeholder="ej. 65" oninput="app.calcCM()"/>
+        <div class="hint">Mínimo: 50% de OT con cotización enviada</div>
+      </div>
+      <div class="form-group">
+        <label>OT Aprobadas <span class="badge badge-gris">KPI ≥ 15% s/cotiz.</span></label>
+        <input type="number" id="cm_aprobado" min="0" placeholder="ej. 12" oninput="app.calcCM()"/>
+        <div class="hint">Mínimo: 15% de las cotizaciones aprobadas</div>
+      </div>
+    </div>
+
+    <!-- Resultado -->
+    <div class="result-box" style="margin-top:16px;flex-wrap:wrap;gap:20px">
+      <div style="text-align:center">
+        <div class="result-label">% Envío</div>
+        <div class="result-value" id="cm-pct-envio">—</div>
+        <div id="cm-badge-envio" style="margin-top:4px"></div>
+      </div>
+      <div style="text-align:center">
+        <div class="result-label">% Cotización</div>
+        <div class="result-value" id="cm-pct-cot">—</div>
+        <div id="cm-badge-cot" style="margin-top:4px"></div>
+      </div>
+      <div style="text-align:center">
+        <div class="result-label">% Aprobación</div>
+        <div class="result-value" id="cm-pct-apro">—</div>
+        <div id="cm-badge-apro" style="margin-top:4px"></div>
+      </div>
+      <div style="text-align:center;flex:1;min-width:140px">
+        <div class="result-label">Resultado Licencia</div>
+        <div id="cm-resultado-badge" style="margin-top:6px;font-size:26px;font-weight:800"></div>
+      </div>
+    </div>
+
+    <div id="cm-alertas" style="margin-top:12px"></div>
+  </div>
+
+  <!-- Tabla de referencia -->
+  <div class="section">
+    <div class="section-title" style="font-size:13px;margin-bottom:8px">Tabla de KPIs — Clear Mechanic</div>
+    <div class="table-wrap">
+    <table>
+      <thead><tr><th>KPI</th><th>Umbral Mínimo</th><th>Cálculo</th><th>Si no cumple</th></tr></thead>
+      <tbody>
+        <tr class="highlight"><td>% Envío</td><td>100%</td><td>OT Enviadas / OT Total</td><td rowspan="3" style="color:var(--rojo);font-weight:700;text-align:center">Paga Licencia<br>USD $440</td></tr>
+        <tr class="highlight"><td>% Cotización</td><td>50%</td><td>OT Cotizadas / OT Total</td></tr>
+        <tr class="highlight"><td>% Aprobación</td><td>15%</td><td>OT Aprobadas / OT Cotizadas*</td></tr>
+      </tbody>
+    </table>
+    </div>
+    <div style="font-size:11px;color:var(--texto2);margin-top:6px">* El % Aprobación se calcula sobre cotizaciones sólo cuando % Cotización ≥ 50%. De lo contrario se muestra 0%.</div>
+  </div>
+</div>
+
+<!-- ═══════════ HISTORICO ═══════════ -->
+<div id="tab-historico" class="hidden">
+  <div class="section">
+    <div class="section-title">📈 Histórico — Tendencia de KPIs</div>
+    <div class="section-sub">Evolución mensual de los indicadores principales por sucursal.</div>
+
+    <div style="margin-bottom:12px">
+      <label style="font-size:12px;font-weight:600;color:var(--texto2);margin-right:8px">Indicador:</label>
+      <select id="hist-indicador" onchange="app.renderHistorico()">
+        <option value="p1_puntaje">Pilar 1 — Puntaje</option>
+        <option value="p1_venta_rep">P1: Venta Repuestos %</option>
+        <option value="p1_paso_veh">P1: Paso Vehicular %</option>
+        <option value="p1_campanas">P1: Campañas Servicio %</option>
+        <option value="p1_mpp">P1: MPP %</option>
+        <option value="p4_nps">Pilar 4 — NPS %</option>
+        <option value="p4_tasa_resp">NPS — Tasa Respuesta %</option>
+        <option value="sc_pv">Service Cars — PV</option>
+        <option value="cap_cert1">Capacitación — Cert. Lv.1 %</option>
+        <option value="cap_cert2">Capacitación — Cert. Lv.2 %</option>
+        <option value="cm_pct_envio">Clear Mechanic — % Envío</option>
+        <option value="cm_pct_cot">Clear Mechanic — % Cotización</option>
+        <option value="cm_pct_apro">Clear Mechanic — % Aprobación</option>
+      </select>
+    </div>
+
+    <div class="chart-container" style="height:320px"><canvas id="chart-historico"></canvas></div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">Resumen Histórico — Tabla</div>
+    <div class="table-wrap" id="tabla-historico"></div>
+  </div>
+</div>
+
+</div><!-- /main -->
+
+<!-- MODAL SUCURSAL -->
+<div class="modal-overlay hidden" id="modal-sucursal">
+  <div class="modal">
+    <h3>➕ Agregar Sucursal</h3>
+    <div class="form-group" style="margin-bottom:16px">
+      <label>Nombre de la Sucursal</label>
+      <input type="text" id="nueva-sucursal-input" placeholder="ej. Sucursal Providencia"/>
+    </div>
+    <div style="display:flex;gap:8px">
+      <button class="btn btn-primary" onclick="app.agregarSucursal()">Agregar</button>
+      <button class="btn btn-outline" style="background:#fff;color:var(--texto);border:1px solid var(--borde)" onclick="app.closeModalSucursal()">Cancelar</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ═══════════════════════════════════════════════════════════════
+//  ESTADO Y DATOS
+// ═══════════════════════════════════════════════════════════════
+const STORAGE_KEY = 'hyundai_pv_2026';
+
+// ═══════════════════════════════════════════════════════════════
+//  METAS ANUALES 2026
+// ═══════════════════════════════════════════════════════════════
+const METAS = {
+  // Paso vehicular por sucursal
+  pv: {
+    'Curifor Chillan':  {'2026-01':74,'2026-02':61,'2026-03':64,'2026-04':63,'2026-05':57,'2026-06':64,'2026-07':70,'2026-08':70,'2026-09':65,'2026-10':71,'2026-11':66,'2026-12':59},
+    'Curifor Curico':   {'2026-01':39,'2026-02':32,'2026-03':40,'2026-04':33,'2026-05':31,'2026-06':34,'2026-07':37,'2026-08':37,'2026-09':35,'2026-10':38,'2026-11':35,'2026-12':26},
+    'Curifor Linderos': {'2026-01':71,'2026-02':58,'2026-03':61,'2026-04':60,'2026-05':54,'2026-06':61,'2026-07':67,'2026-08':66,'2026-09':62,'2026-10':68,'2026-11':63,'2026-12':56},
+    'Curifor Rancagua': {'2026-01':44,'2026-02':37,'2026-03':39,'2026-04':38,'2026-05':34,'2026-06':38,'2026-07':42,'2026-08':42,'2026-09':39,'2026-10':43,'2026-11':40,'2026-12':36},
+  },
+  // Paso vehicular red Hyundai total
+  pv_red: {'2026-01':228,'2026-02':188,'2026-03':198,'2026-04':194,'2026-05':176,'2026-06':197,'2026-07':216,'2026-08':215,'2026-09':201,'2026-10':220,'2026-11':204,'2026-12':183},
+  pv_red_2025: {'2026-01':212,'2026-02':175,'2026-03':163,'2026-04':189,'2026-05':204,'2026-06':141,'2026-07':175,'2026-08':201,'2026-09':249,'2026-10':205,'2026-11':248,'2026-12':207},
+  // Metas compra repuestos — totales grupo Curifor
+  repuestos: {
+    hyundai:    {'2026-01':84384682,'2026-02':62345000,'2026-03':61445028,'2026-04':81869029,'2026-05':59617877,'2026-06':74983811,'2026-07':74247447,'2026-08':72091194,'2026-09':47886801,'2026-10':63332168,'2026-11':75118105,'2026-12':99704296},
+    jac:        {'2026-01':21127755,'2026-02':24750300,'2026-03':24750300,'2026-04':24750300,'2026-05':24750300,'2026-06':24750300,'2026-07':29580361,'2026-08':29580361,'2026-09':24750300,'2026-10':29580361,'2026-11':29580361,'2026-12':29580361},
+    emergentes: {'2026-01':8580354,'2026-02':8580354,'2026-03':8580354,'2026-04':8580354,'2026-05':8580354,'2026-06':8580354,'2026-07':8580354,'2026-08':8580354,'2026-09':8580354,'2026-10':8580354,'2026-11':8580354,'2026-12':8580354},
+  }
+};
+const MESES_LABELS = ['','Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'];
+function getMetaPV(suc, mes) { return (METAS.pv[suc] && METAS.pv[suc][mes]) || null; }
+function getMetaRepTotales(mes) {
+  const h = METAS.repuestos.hyundai[mes]||0, j = METAS.repuestos.jac[mes]||0, e = METAS.repuestos.emergentes[mes]||0;
+  return { hyundai:h, jac:j, emergentes:e, total:h+j+e };
+}
+
+function defaultData() {
+  return {
+    p1_llave1: true, p1_llave2: true,
+    p1_venta_rep: null, p1_paso_veh: null, p1_paso_veh_real: null, p1_campanas: null, p1_mpp: null,
+    p2_cumpl: null, p2_vor_cargo: 0, p2_facturacion: null,
+    p3_poliza: null, p3_dyp: null, p3_fact_seguros: null, p3_fact_dyp: null,
+    p4_nps: null, p4_tasa_resp: null, p4_facturacion: null, p4_n_resp: null, p4_n_total: null,
+    sc_pv: null, sc_autos: null, sc_dias_adicional: 0, sc_modelo: '',
+    cap_pres: null, cap_pres_falt: 0, cap_online: null, cap_online_falt: 0,
+    cap_id_viz: null, cap_id_comp: null,
+    cap_cert1: null, cap_cert2: null, cap_uf: 38500,
+    // Clear Mechanic
+    cm_ot: null, cm_envios: null, cm_cotizacion: null, cm_aprobado: null,
+  };
+}
+
+function loadStore() {
+  try { return JSON.parse(localStorage.getItem(STORAGE_KEY)) || {}; } catch(e) { return {}; }
+}
+function saveStore(st) { localStorage.setItem(STORAGE_KEY, JSON.stringify(st)); }
+
+// ═══════════════════════════════════════════════════════════════
+//  LÓGICA DE CÁLCULO
+// ═══════════════════════════════════════════════════════════════
+function calcPilar1Score(d) {
+  const c1 = d.p1_venta_rep, c2 = d.p1_paso_veh, c3 = d.p1_campanas, c4 = d.p1_mpp;
+  if (c1==null && c2==null && c3==null && c4==null) return null;
+  return (c1||0)*0.50 + (c2||0)*0.20 + (c3||0)*0.10 + (c4||0)*0.20;
+}
+
+function pilar1Rebate(puntaje, llave1, llave2) {
+  if (!llave1 || !llave2) return 0;
+  if (puntaje === null) return null;
+  if (puntaje > 105) return 12;
+  if (puntaje >= 97) return 10;
+  if (puntaje >= 90) return 8;
+  if (puntaje >= 80) return 5;
+  if (puntaje >= 70) return 3;
+  return 0;
+}
+
+function pilar1Tramo(puntaje) {
+  if (puntaje === null) return '—';
+  if (puntaje > 105) return 'Tramo 5';
+  if (puntaje >= 97) return 'Tramo 4';
+  if (puntaje >= 90) return 'Tramo 3';
+  if (puntaje >= 80) return 'Tramo 2';
+  if (puntaje >= 70) return 'Tramo 1';
+  return 'Tramo 0';
+}
+
+function subPilarPuntaje(cumpl, tipo) {
+  if (cumpl == null) return '—';
+  if (tipo === 'campanas') {
+    if (cumpl >= 100) return '5'; if (cumpl >= 91) return '4'; if (cumpl >= 81) return '3';
+    if (cumpl >= 75) return '2'; if (cumpl >= 70) return '1'; return '0';
+  } else {
+    if (cumpl > 105) return '5'; if (cumpl >= 97) return '4'; if (cumpl >= 90) return '3';
+    if (cumpl >= 87) return '2'; if (cumpl >= 85) return '1'; return '0';
+  }
+}
+
+function pilar2Rebate(cumpl) {
+  if (cumpl === null) return null;
+  return cumpl >= 100 ? 2 : 0;
+}
+
+function pilar3Rebate(poliza, dyp) {
+  return { seg: (poliza >= 100 ? 10 : 0), dyp: (dyp >= 100 ? 10 : 0) };
+}
+
+function pilar4Rebate(nps, tasa) {
+  if (nps === null || tasa === null) return null;
+  if (tasa < 35) return 0;
+  if (nps < 80) return 0;
+  if (nps >= 85.5) return 0.25;
+  return 0;
+}
+
+function scMinimo(pv) { return Math.max(1, Math.ceil(pv / 100)); }
+
+function getCMResult(d) {
+  const ot = d.cm_ot, envios = d.cm_envios, cot = d.cm_cotizacion, apro = d.cm_aprobado;
+  if (ot === null || ot === 0) return null;
+  const pctEnvio = envios !== null ? (envios / ot) * 100 : null;
+  const pctCot   = cot   !== null ? (cot   / ot) * 100 : null;
+  // % Aprobado = Aprobado/Cotización — solo se muestra cuando %Cotización ≥ 50%
+  let pctApro = null;
+  if (cot !== null && cot > 0 && pctCot >= 50 && apro !== null) pctApro = (apro / cot) * 100;
+  else if (pctCot !== null && pctCot < 50) pctApro = 0; // gate no superado
+  const envioOk = pctEnvio !== null && pctEnvio >= 100;
+  const cotOk   = pctCot   !== null && pctCot   >= 50;
+  const aproOk  = pctApro  !== null && pctApro  >= 15;
+  const noPaga  = envioOk && cotOk && aproOk;
+  return { pctEnvio, pctCot, pctApro, envioOk, cotOk, aproOk, noPaga };
+}
+
+function fmtPct(v) { return v === null ? '—' : v.toFixed(1) + '%'; }
+function fmtMoney(v) { return v == null || isNaN(v) ? '—' : '$' + Math.round(v).toLocaleString('es-CL'); }
+
+function semaforo(value, meta, warning) {
+  if (value === null || value === undefined) return 'gris';
+  if (value >= meta) return 'verde';
+  if (value >= warning) return 'amarillo';
+  return 'rojo';
+}
+
+function badge(text, color) {
+  return `<span class="badge badge-${color}">${text}</span>`;
+}
+
+// ═══════════════════════════════════════════════════════════════
+//  APP
+// ═══════════════════════════════════════════════════════════════
+const app = (() => {
+  let store = loadStore();
+  let sucursal = '';
+  let mes = document.getElementById('sel-mes').value;
+  let currentTab = 'dashboard';
+  let chartRadial = null, chartHist = null;
+
+  function getSucursales() { return store.sucursales || ['Principal']; }
+
+  function getData(s, m) {
+    if (!store.data) store.data = {};
+    if (!store.data[s]) store.data[s] = {};
+    if (!store.data[s][m]) store.data[s][m] = defaultData();
+    return store.data[s][m];
+  }
+
+  function setData(s, m, d) {
+    if (!store.data) store.data = {};
+    if (!store.data[s]) store.data[s] = {};
+    store.data[s][m] = d;
+  }
+
+  function getD() { return getData(sucursal, mes); }
+  function saveD(d) { setData(sucursal, mes, d); saveStore(store); }
+
+  // ── Render sucursales dropdown ─────────────────────────────
+  function renderSucursales() {
+    const sel = document.getElementById('sel-sucursal');
+    const suc = getSucursales();
+    sel.innerHTML = suc.map(s => `<option value="${s}" ${s===sucursal?'selected':''}>${s}</option>`).join('');
+    if (!sucursal || !suc.includes(sucursal)) sucursal = suc[0];
+  }
+
+  // ── Tabs ───────────────────────────────────────────────────
+  function setTab(name) {
+    currentTab = name;
+    document.querySelectorAll('.tab').forEach((t,i) => {
+      const tabs = ['dashboard','pilar1','pilar2','pilar3','pilar4','servicecars','capacitacion','metas','clearmechanic','historico'];
+      t.classList.toggle('active', tabs[i] === name);
+    });
+    document.querySelectorAll('[id^=tab-]').forEach(el => {
+      el.classList.toggle('hidden', el.id !== 'tab-'+name);
+    });
+    loadFormValues();
+    if (name === 'dashboard') renderDashboard();
+    if (name === 'metas') renderTabMetas();
+    if (name === 'clearmechanic') { calcCM(); renderCMConsolidado(); }
+    if (name === 'historico') renderHistorico();
+  }
+
+  // ── Load form values from data ─────────────────────────────
+  function loadFormValues() {
+    const d = getD();
+    const fields = ['p1_venta_rep','p1_paso_veh','p1_paso_veh_real','p1_campanas','p1_mpp',
+      'p2_cumpl','p2_vor_cargo','p2_facturacion',
+      'p3_poliza','p3_dyp','p3_fact_seguros','p3_fact_dyp',
+      'p4_nps','p4_tasa_resp','p4_facturacion','p4_n_resp','p4_n_total',
+      'sc_pv','sc_autos','sc_dias_adicional','sc_modelo',
+      'cap_pres','cap_pres_falt','cap_online','cap_online_falt',
+      'cap_id_viz','cap_id_comp','cap_cert1','cap_cert2','cap_uf',
+      'cm_ot','cm_envios','cm_cotizacion','cm_aprobado'];
+    fields.forEach(f => {
+      const el = document.getElementById(f);
+      if (el) el.value = d[f] !== null && d[f] !== undefined ? d[f] : '';
+    });
+    // Llaves
+    updateLlaveButtons(1, d.p1_llave1);
+    updateLlaveButtons(2, d.p1_llave2);
+    // Meta PV chip
+    const metaPV = getMetaPV(sucursal, mes);
+    const pvChip = document.getElementById('p1-pv-meta-chip');
+    if (pvChip) pvChip.textContent = metaPV ? `🎯 Meta ${mes}: ${metaPV} unidades` : '🎯 Meta: sin datos para esta sucursal';
+    // CM sucursal nombre
+    const cmSucEl = document.getElementById('cm-suc-nombre');
+    if (cmSucEl) cmSucEl.textContent = sucursal;
+    // Recalc
+    calcP1(); calcP2(); calcP3(); calcP4(); calcSC(); calcCap(); calcCM();
+  }
+
+  // ── Collect form values ────────────────────────────────────
+  function collectForm() {
+    const d = getD();
+    const num = (id) => { const v = parseFloat(document.getElementById(id)?.value); return isNaN(v) ? null : v; };
+    const str = (id) => document.getElementById(id)?.value || '';
+    d.p1_venta_rep = num('p1_venta_rep'); d.p1_paso_veh = num('p1_paso_veh');
+    d.p1_paso_veh_real = num('p1_paso_veh_real');
+    d.p1_campanas = num('p1_campanas'); d.p1_mpp = num('p1_mpp');
+    d.p2_cumpl = num('p2_cumpl'); d.p2_vor_cargo = num('p2_vor_cargo') || 0;
+    d.p2_facturacion = num('p2_facturacion');
+    d.p3_poliza = num('p3_poliza'); d.p3_dyp = num('p3_dyp');
+    d.p3_fact_seguros = num('p3_fact_seguros'); d.p3_fact_dyp = num('p3_fact_dyp');
+    d.p4_nps = num('p4_nps'); d.p4_tasa_resp = num('p4_tasa_resp');
+    d.p4_facturacion = num('p4_facturacion'); d.p4_n_resp = num('p4_n_resp');
+    d.p4_n_total = num('p4_n_total');
+    d.sc_pv = num('sc_pv'); d.sc_autos = num('sc_autos');
+    d.sc_dias_adicional = num('sc_dias_adicional') || 0;
+    d.sc_modelo = str('sc_modelo');
+    d.cap_pres = num('cap_pres'); d.cap_pres_falt = num('cap_pres_falt') || 0;
+    d.cap_online = num('cap_online'); d.cap_online_falt = num('cap_online_falt') || 0;
+    d.cap_id_viz = num('cap_id_viz'); d.cap_id_comp = num('cap_id_comp');
+    d.cap_cert1 = num('cap_cert1'); d.cap_cert2 = num('cap_cert2');
+    d.cap_uf = num('cap_uf') || 38500;
+    d.cm_ot = num('cm_ot'); d.cm_envios = num('cm_envios');
+    d.cm_cotizacion = num('cm_cotizacion'); d.cm_aprobado = num('cm_aprobado');
+    return d;
+  }
+
+  // ── PILAR 1 ───────────────────────────────────────────────
+  function calcP1() {
+    const d = collectForm();
+    const puntaje = calcPilar1Score(d);
+    const rebate = pilar1Rebate(puntaje, d.p1_llave1, d.p1_llave2);
+    const tramo = pilar1Tramo(puntaje);
+
+    document.getElementById('p1-puntaje-num').textContent = puntaje !== null ? puntaje.toFixed(1) : '—';
+    document.getElementById('p1-tramo').textContent = tramo;
+    document.getElementById('p1-rebate').textContent = rebate !== null ? rebate + '%' : '—';
+    document.getElementById('p1-rebate').style.color = rebate >= 10 ? 'var(--verde)' : rebate >= 5 ? 'var(--amarillo)' : 'var(--rojo)';
+
+    const llaveOk = d.p1_llave1 && d.p1_llave2;
+    document.getElementById('p1-llave-estado').innerHTML = llaveOk ? badge('✓ Activas','verde') : badge('✗ Bloqueadas','rojo');
+
+    // Hints
+    const hints = [
+      {id:'hint-1-1', val: d.p1_venta_rep, tipo:'normal'},
+      {id:'hint-1-2', val: d.p1_paso_veh, tipo:'normal'},
+      {id:'hint-1-3', val: d.p1_campanas, tipo:'campanas'},
+      {id:'hint-1-4', val: d.p1_mpp, tipo:'normal'},
+    ];
+    hints.forEach(h => {
+      const el = document.getElementById(h.id);
+      if (el) el.textContent = h.val !== null ? `Puntaje sub-pilar: ${subPilarPuntaje(h.val, h.tipo)} / 5` : '';
+    });
+
+    // Tabla rebate highlight
+    renderTablaP1Rebate(puntaje, !llaveOk);
+    saveD(d);
+  }
+
+  function renderTablaP1Rebate(puntaje, bloqueado) {
+    const rows = [
+      ['>105','5','12%'],
+      ['97 – 104','4','10%'],
+      ['90 – 96','3','8%'],
+      ['80 – 89','2','5%'],
+      ['70 – 79','1','3%'],
+      ['<70','0','0%'],
+    ];
+    const limits = [105,97,90,80,70,0];
+    const tbody = document.getElementById('tabla-p1-rebate');
+    if (!tbody) return;
+    tbody.innerHTML = rows.map((r,i) => {
+      let active = false;
+      if (puntaje !== null) {
+        if (i === 0) active = puntaje > 105;
+        else if (i === 5) active = puntaje < 70;
+        else active = puntaje >= limits[i] && puntaje < limits[i-1];
+      }
+      const style = active ? (bloqueado ? 'background:#fee2e2' : 'background:#dcfce7;font-weight:700') : '';
+      return `<tr style="${style}"><td>${r[0]}</td><td>${r[1]}</td><td>${bloqueado && active ? '<s>'+r[2]+'</s> → 0% (llave bloqueada)' : r[2]}</td></tr>`;
+    }).join('');
+  }
+
+  function setLlave(num, val) {
+    const d = getD();
+    if (num === 1) d.p1_llave1 = val;
+    if (num === 2) d.p1_llave2 = val;
+    saveD(d);
+    updateLlaveButtons(num, val);
+    calcP1();
+  }
+
+  function updateLlaveButtons(num, val) {
+    const si = document.getElementById(`btn-llave${num}-si`);
+    const no = document.getElementById(`btn-llave${num}-no`);
+    if (!si || !no) return;
+    si.className = 'switch-btn' + (val ? ' on' : '');
+    no.className = 'switch-btn' + (!val ? ' off' : '');
+  }
+
+  // ── PILAR 2 ───────────────────────────────────────────────
+  function calcP2() {
+    const d = collectForm();
+    const r = pilar2Rebate(d.p2_cumpl);
+    const monto = (r !== null && d.p2_facturacion) ? d.p2_facturacion * r / 100 : null;
+    const neto = monto !== null ? monto - (d.p2_vor_cargo || 0) : null;
+
+    document.getElementById('p2-cumpl-badge').innerHTML = d.p2_cumpl !== null
+      ? badge(d.p2_cumpl + '%', d.p2_cumpl >= 100 ? 'verde' : 'rojo') : '—';
+    document.getElementById('p2-rebate').textContent = r !== null ? r + '%' : '—';
+    document.getElementById('p2-rebate').style.color = r > 0 ? 'var(--verde)' : 'var(--rojo)';
+    document.getElementById('p2-monto').textContent = fmtMoney(monto);
+    document.getElementById('p2-vor-desc').textContent = d.p2_vor_cargo > 0 ? '-' + fmtMoney(d.p2_vor_cargo) : '$0';
+    document.getElementById('p2-neto').textContent = fmtMoney(neto);
+    saveD(d);
+  }
+
+  // ── PILAR 3 ───────────────────────────────────────────────
+  function calcP3() {
+    const d = collectForm();
+    const r = pilar3Rebate(d.p3_poliza || 0, d.p3_dyp || 0);
+    const mS = (d.p3_fact_seguros) ? d.p3_fact_seguros * r.seg / 100 : null;
+    const mD = (d.p3_fact_dyp) ? d.p3_fact_dyp * r.dyp / 100 : null;
+    const total = (mS !== null || mD !== null) ? (mS||0) + (mD||0) : null;
+
+    document.getElementById('p3-reb-seguros').textContent = r.seg + '%';
+    document.getElementById('p3-reb-seguros').style.color = r.seg > 0 ? 'var(--verde)' : 'var(--rojo)';
+    document.getElementById('p3-monto-seguros').textContent = fmtMoney(mS);
+    document.getElementById('p3-reb-dyp').textContent = r.dyp + '%';
+    document.getElementById('p3-reb-dyp').style.color = r.dyp > 0 ? 'var(--verde)' : 'var(--rojo)';
+    document.getElementById('p3-monto-dyp').textContent = fmtMoney(mD);
+    document.getElementById('p3-total').textContent = fmtMoney(total);
+    saveD(d);
+  }
+
+  // ── PILAR 4 ───────────────────────────────────────────────
+  function calcP4() {
+    const d = collectForm();
+    const r = pilar4Rebate(d.p4_nps, d.p4_tasa_resp);
+    const monto = (r !== null && d.p4_facturacion) ? d.p4_facturacion * r / 100 : null;
+    const llaveOk = d.p4_tasa_resp >= 35;
+
+    document.getElementById('p4-nps-num').textContent = d.p4_nps !== null ? d.p4_nps.toFixed(1) + '%' : '—';
+    document.getElementById('p4-nps-num').style.color = d.p4_nps >= 85.5 ? 'var(--verde)' : d.p4_nps >= 80 ? 'var(--amarillo)' : 'var(--rojo)';
+    document.getElementById('p4-tasa-show').textContent = d.p4_tasa_resp !== null ? d.p4_tasa_resp + '%' : '—';
+    document.getElementById('p4-llave-estado').innerHTML = d.p4_tasa_resp !== null
+      ? badge(llaveOk ? '✓ ≥35%' : '✗ <35%', llaveOk ? 'verde' : 'rojo') : '—';
+    document.getElementById('p4-rebate').textContent = r !== null ? r + '%' : '—';
+    document.getElementById('p4-rebate').style.color = r > 0 ? 'var(--verde)' : 'var(--rojo)';
+    document.getElementById('p4-monto').textContent = fmtMoney(monto);
+
+    // Alertas
+    let alertas = '';
+    if (d.p4_nps !== null && d.p4_nps < 80) alertas += `<div class="alert alert-danger">⛔ NPS (${d.p4_nps.toFixed(1)}%) está por debajo del piso mínimo de 80%. No se paga rebate.</div>`;
+    else if (d.p4_nps !== null && d.p4_nps < 85.5) alertas += `<div class="alert alert-warn">⚠ NPS (${d.p4_nps.toFixed(1)}%) no alcanza la meta de 85,5%. Faltan ${(85.5 - d.p4_nps).toFixed(1)} puntos.</div>`;
+    else if (d.p4_nps !== null) alertas += `<div class="alert alert-success">✓ NPS (${d.p4_nps.toFixed(1)}%) supera la meta de 85,5%. Rebate activo.</div>`;
+    if (d.p4_tasa_resp !== null && !llaveOk) alertas += `<div class="alert alert-danger">⛔ Tasa de respuesta (${d.p4_tasa_resp}%) es menor al 35% requerido. No se activa el rebate 4.</div>`;
+    document.getElementById('p4-alertas').innerHTML = alertas;
+    saveD(d);
+  }
+
+  // ── SERVICE CARS ──────────────────────────────────────────
+  function calcSC() {
+    const d = collectForm();
+    const min = d.sc_pv !== null ? scMinimo(d.sc_pv) : null;
+    const disp = d.sc_autos;
+    const diff = (min !== null && disp !== null) ? disp - min : null;
+    const ok = diff !== null && diff >= 0;
+    const aporte = d.sc_dias_adicional > 0 && ok ? d.sc_dias_adicional * 30000 : 0;
+
+    document.getElementById('sc-minimo').textContent = min !== null ? min + ' auto(s)' : '—';
+    document.getElementById('sc-disponibles').textContent = disp !== null ? disp + ' auto(s)' : '—';
+    document.getElementById('sc-diferencia').innerHTML = diff !== null
+      ? `<span style="color:${ok?'var(--verde)':'var(--rojo)'}">${diff >= 0 ? '+' : ''}${diff}</span>` : '—';
+    document.getElementById('sc-estado').innerHTML = diff === null ? '—'
+      : ok ? badge('✓ Cumple','verde') : badge('✗ Déficit','rojo');
+    document.getElementById('sc-aporte').textContent = d.sc_dias_adicional > 0 ? fmtMoney(aporte) + ' bruto' : '$0';
+
+    let alertas = '';
+    if (!ok && diff !== null) alertas += `<div class="alert alert-danger">⛔ Faltan ${Math.abs(diff)} auto(s). Incumplimiento penaliza metas en <strong>20%</strong> y no hay reembolso del importador.</div>`;
+    else if (ok && diff !== null) alertas += `<div class="alert alert-success">✓ Cumple con el mínimo de ${min} auto(s) para ${d.sc_pv} PV.</div>`;
+    document.getElementById('sc-alertas').innerHTML = alertas;
+    saveD(d);
+  }
+
+  // ── CAPACITACION ──────────────────────────────────────────
+  function calcCap() {
+    const d = collectForm();
+    const uf = d.cap_uf || 38500;
+    const multaPres = (d.cap_pres_falt || 0) * 3 * uf;
+    const multaOnline = (d.cap_online_falt || 0) * 1.5 * uf;
+    const multaTotal = multaPres + multaOnline;
+    const idOk = (d.cap_id_viz >= 20) && (d.cap_id_comp >= 20);
+
+    const st = (v, meta, warn) => badge(
+      v !== null ? fmtPct(v) : '—',
+      v === null ? 'gris' : v >= meta ? 'verde' : v >= warn ? 'amarillo' : 'rojo'
+    );
+    document.getElementById('cap-estado-pres').innerHTML = st(d.cap_pres, 100, 90);
+    document.getElementById('cap-estado-online').innerHTML = st(d.cap_online, 100, 90);
+    document.getElementById('cap-estado-id').innerHTML = d.cap_id_viz !== null && d.cap_id_comp !== null
+      ? badge((idOk ? '✓ ' : '✗ ') + `${d.cap_id_viz||0}/20 viz · ${d.cap_id_comp||0}/20 comp`, idOk ? 'verde' : 'rojo')
+      : '—';
+    document.getElementById('cap-estado-cert1').innerHTML = st(d.cap_cert1, 90, 80);
+    document.getElementById('cap-estado-cert2').innerHTML = st(d.cap_cert2, 70, 60);
+    document.getElementById('cap-multa').textContent = multaTotal > 0 ? fmtMoney(multaTotal) : '$0';
+    saveD(d);
+  }
+
+  // ── PILAR 1 - PV REAL AUTO-CALC ──────────────────────────
+  function calcP1PVReal() {
+    const realEl = document.getElementById('p1_paso_veh_real');
+    const pctEl  = document.getElementById('p1_paso_veh');
+    if (!realEl || !pctEl) return;
+    const real = parseFloat(realEl.value);
+    const meta = getMetaPV(sucursal, mes);
+    if (!isNaN(real) && meta) {
+      const pct = (real / meta * 100).toFixed(1);
+      pctEl.value = pct;
+    }
+    calcP1();
+  }
+
+  // ── METAS TAB ─────────────────────────────────────────────
+  function renderTabMetas() {
+    const meses = ['2026-01','2026-02','2026-03','2026-04','2026-05','2026-06',
+                   '2026-07','2026-08','2026-09','2026-10','2026-11','2026-12'];
+    const labels = ['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'];
+    const suc = getSucursales();
+
+    // Tabla PV por sucursal
+    const pvTable = document.getElementById('tabla-meta-pv-sucursal');
+    if (pvTable) {
+      const thead = `<thead><tr><th>Sucursal</th>${labels.map(l=>`<th>${l}</th>`).join('')}<th>Total</th></tr></thead>`;
+      const rows = suc.map(s => {
+        const vals = meses.map(m => METAS.pv[s] ? (METAS.pv[s][m] || '—') : '—');
+        const total = meses.reduce((sum,m) => sum + (METAS.pv[s] ? (METAS.pv[s][m]||0) : 0), 0);
+        const curMes = mes;
+        return `<tr ${s===sucursal?'class="highlight"':''}>
+          <td><strong>${s}</strong></td>
+          ${vals.map((v,i) => `<td style="text-align:center${meses[i]===curMes?';background:#dbeafe;font-weight:700':''}">${v}</td>`).join('')}
+          <td style="text-align:center;font-weight:700">${total||'—'}</td>
+        </tr>`;
+      }).join('');
+      // Row total
+      const totRow = meses.map(m => suc.reduce((sum,s) => sum + (METAS.pv[s] ? (METAS.pv[s][m]||0) : 0), 0));
+      const grandTotal = totRow.reduce((a,b) => a+b, 0);
+      const totHtml = `<tr style="font-weight:700;background:var(--azul);color:#fff">
+        <td>Total Red</td>
+        ${totRow.map((v,i) => `<td style="text-align:center${meses[i]===mes?';background:#1e6091':''}">${v||'—'}</td>`).join('')}
+        <td style="text-align:center">${grandTotal}</td>
+      </tr>`;
+      pvTable.innerHTML = `${thead}<tbody>${rows}${totHtml}</tbody>`;
+    }
+
+    // Tabla PV red total
+    const pvRedTable = document.getElementById('tabla-meta-pv-red');
+    if (pvRedTable) {
+      const vals26 = meses.map(m => METAS.pv_red[m] || '—');
+      const vals25 = meses.map(m => METAS.pv_red_2025[m] || '—');
+      const tot26 = meses.reduce((s,m) => s+(METAS.pv_red[m]||0), 0);
+      const tot25 = meses.reduce((s,m) => s+(METAS.pv_red_2025[m]||0), 0);
+      pvRedTable.innerHTML = `
+        <thead><tr><th>Año</th>${labels.map(l=>`<th>${l}</th>`).join('')}<th>Total</th></tr></thead>
+        <tbody>
+          <tr class="highlight"><td><strong>2026</strong></td>${vals26.map((v,i)=>`<td style="text-align:center${meses[i]===mes?';font-weight:700;background:#dbeafe':''}">${v}</td>`).join('')}<td style="text-align:center;font-weight:700">${tot26}</td></tr>
+          <tr><td>2025</td>${vals25.map(v=>`<td style="text-align:center">${v}</td>`).join('')}<td style="text-align:center;font-weight:700">${tot25}</td></tr>
+        </tbody>`;
+    }
+
+    // Tabla repuestos
+    const repTable = document.getElementById('tabla-meta-repuestos');
+    if (repTable) {
+      const rowH = meses.map(m => METAS.repuestos.hyundai[m]||0);
+      const rowJ = meses.map(m => METAS.repuestos.jac[m]||0);
+      const rowE = meses.map(m => METAS.repuestos.emergentes[m]||0);
+      const rowT = meses.map((_,i) => rowH[i]+rowJ[i]+rowE[i]);
+      const fmt = v => '$'+Math.round(v).toLocaleString('es-CL');
+      const makeRow = (label, vals, bold) => {
+        const tot = vals.reduce((a,b)=>a+b,0);
+        return `<tr ${bold?'style="font-weight:700"':''}>
+          <td>${label}</td>
+          ${vals.map((v,i)=>`<td style="text-align:right;font-size:11px${meses[i]===mes?';background:#dbeafe':''}">${fmt(v)}</td>`).join('')}
+          <td style="text-align:right;font-weight:700;font-size:11px">${fmt(tot)}</td>
+        </tr>`;
+      };
+      repTable.innerHTML = `
+        <thead><tr><th>Marca</th>${labels.map(l=>`<th style="text-align:right">${l}</th>`).join('')}<th style="text-align:right">Total</th></tr></thead>
+        <tbody>
+          ${makeRow('Hyundai', rowH, false)}
+          ${makeRow('JAC', rowJ, false)}
+          ${makeRow('Emergentes', rowE, false)}
+          ${makeRow('TOTAL', rowT, true)}
+        </tbody>`;
+    }
+  }
+
+  // ── CLEAR MECHANIC ────────────────────────────────────────
+  function calcCM() {
+    const d = collectForm();
+    const r = getCMResult(d);
+    const fmt1 = v => v === null ? '—' : v.toFixed(1) + '%';
+
+    document.getElementById('cm-pct-envio').textContent = fmt1(r ? r.pctEnvio : null);
+    document.getElementById('cm-pct-cot').textContent   = fmt1(r ? r.pctCot   : null);
+    document.getElementById('cm-pct-apro').textContent  = r ? (r.pctApro === 0 && r.pctCot < 50 ? '0% *' : fmt1(r.pctApro)) : '—';
+
+    if (r) {
+      document.getElementById('cm-badge-envio').innerHTML = badge(r.envioOk ? '✓ ≥100%' : '✗ <100%', r.envioOk ? 'verde' : 'rojo');
+      document.getElementById('cm-badge-cot').innerHTML   = badge(r.cotOk   ? '✓ ≥50%'  : '✗ <50%',  r.cotOk   ? 'verde' : 'rojo');
+      document.getElementById('cm-badge-apro').innerHTML  = badge(r.aproOk  ? '✓ ≥15%'  : '✗ <15%',  r.aproOk  ? 'verde' : 'rojo');
+      const resEl = document.getElementById('cm-resultado-badge');
+      resEl.innerHTML = r.noPaga
+        ? '<span style="color:var(--verde);font-size:22px">✓ NO PAGA</span>'
+        : '<span style="color:var(--rojo);font-size:22px">✗ PAGA<br><span style="font-size:14px">USD $440</span></span>';
+
+      let alertas = '';
+      if (!r.envioOk && r.pctEnvio !== null) alertas += `<div class="alert alert-danger">⛔ % Envío (${r.pctEnvio.toFixed(1)}%) no alcanza el 100% requerido. Faltan ${(100 - r.pctEnvio).toFixed(1)} puntos.</div>`;
+      if (!r.cotOk && r.pctCot !== null) alertas += `<div class="alert alert-warn">⚠ % Cotización (${r.pctCot.toFixed(1)}%) no alcanza el 50% requerido. Faltan ${(50 - r.pctCot).toFixed(1)} puntos.</div>`;
+      if (!r.aproOk && r.pctApro !== null) alertas += `<div class="alert alert-warn">⚠ % Aprobación (${r.pctApro.toFixed(1)}%) no alcanza el 15% requerido${r.pctCot < 50 ? ' (gate cotización no superado)' : ''}.</div>`;
+      if (r.noPaga) alertas += `<div class="alert alert-success">✓ Los 3 KPIs se cumplen. No se paga la licencia este mes.</div>`;
+      document.getElementById('cm-alertas').innerHTML = alertas;
+    } else {
+      ['cm-badge-envio','cm-badge-cot','cm-badge-apro'].forEach(id => document.getElementById(id).innerHTML = '');
+      document.getElementById('cm-resultado-badge').innerHTML = '';
+      document.getElementById('cm-alertas').innerHTML = '';
+    }
+
+    renderCMConsolidado();
+    saveD(d);
+  }
+
+  function renderCMConsolidado() {
+    const suc = getSucursales();
+    const tbody = suc.map(s => {
+      const d = getData(s, mes);
+      const r = getCMResult(d);
+      const fmt = v => v === null ? '—' : v.toFixed(1) + '%';
+      const pctApro = r ? (r.pctApro === 0 && r.pctCot < 50 ? '0% *' : fmt(r.pctApro)) : '—';
+      const res = r
+        ? (r.noPaga
+            ? '<span style="background:#002C5F;color:#fff;padding:3px 10px;border-radius:4px;font-weight:700">No Paga</span>'
+            : '<span style="background:#ef4444;color:#fff;padding:3px 10px;border-radius:4px;font-weight:700">Paga</span>')
+        : '<span style="color:var(--texto2)">Sin datos</span>';
+      const envioColor = r ? (r.envioOk ? 'var(--verde)' : 'var(--rojo)') : '';
+      const cotColor   = r ? (r.cotOk   ? 'var(--verde)' : 'var(--rojo)') : '';
+      const aproColor  = r ? (r.aproOk  ? 'var(--verde)' : 'var(--rojo)') : '';
+      return `<tr ${s===sucursal?'class="highlight"':''}>
+        <td><strong>${s}</strong></td>
+        <td>${d.cm_ot ?? '—'}</td>
+        <td>${d.cm_envios ?? '—'}</td>
+        <td>${d.cm_cotizacion ?? '—'}</td>
+        <td>${d.cm_aprobado ?? '—'}</td>
+        <td style="color:${envioColor};font-weight:600">${r ? fmt(r.pctEnvio) : '—'}</td>
+        <td style="color:${cotColor};font-weight:600">${r ? fmt(r.pctCot) : '—'}</td>
+        <td style="color:${aproColor};font-weight:600">${pctApro}</td>
+        <td style="text-align:center">${res}</td>
+      </tr>`;
+    }).join('');
+
+    const el = document.getElementById('cm-tabla-consolidada');
+    if (el) el.innerHTML = `
+      <table>
+        <thead>
+          <tr>
+            <th>Dealer / Sucursal</th>
+            <th>OT</th>
+            <th>Envíos</th>
+            <th>Cotización</th>
+            <th>Aprobado</th>
+            <th>% Envío <span style="opacity:.7;font-size:10px">KPI 100%</span></th>
+            <th>% Cotización <span style="opacity:.7;font-size:10px">KPI 50%</span></th>
+            <th>% Aprobado <span style="opacity:.7;font-size:10px">KPI 15%</span></th>
+            <th>Resultado</th>
+          </tr>
+        </thead>
+        <tbody>${tbody}</tbody>
+      </table>`;
+
+    // Resumen licencias
+    const resEl = document.getElementById('cm-resumen-licencias');
+    if (resEl) {
+      let pagan = 0, noPagan = 0, sinDatos = 0;
+      suc.forEach(s => {
+        const r = getCMResult(getData(s, mes));
+        if (!r) sinDatos++;
+        else if (r.noPaga) noPagan++;
+        else pagan++;
+      });
+      resEl.innerHTML = `
+        <div class="card rojo" style="flex:1;min-width:140px">
+          <div class="card-title">Pagan Licencia</div>
+          <div class="card-value">${pagan}</div>
+          <div class="card-meta">USD $${pagan * 440} total</div>
+        </div>
+        <div class="card verde" style="flex:1;min-width:140px">
+          <div class="card-title">No Pagan</div>
+          <div class="card-value">${noPagan}</div>
+          <div class="card-meta">Cumplen los 3 KPIs</div>
+        </div>
+        <div class="card neutro" style="flex:1;min-width:140px">
+          <div class="card-title">Sin Datos</div>
+          <div class="card-value">${sinDatos}</div>
+          <div class="card-meta">Pendiente de ingreso</div>
+        </div>`;
+    }
+  }
+
+  // ── DASHBOARD ─────────────────────────────────────────────
+  function renderDashboard() {
+    const d = getD();
+    const p1Puntaje = calcPilar1Score(d);
+    const p1R = pilar1Rebate(p1Puntaje, d.p1_llave1, d.p1_llave2);
+    const p2R = pilar2Rebate(d.p2_cumpl);
+    const p3R = d.p3_poliza !== null ? pilar3Rebate(d.p3_poliza||0, d.p3_dyp||0) : null;
+    const p4R = pilar4Rebate(d.p4_nps, d.p4_tasa_resp);
+    const scMin = d.sc_pv !== null ? scMinimo(d.sc_pv) : null;
+    const scOk = scMin !== null && d.sc_autos !== null && d.sc_autos >= scMin;
+
+    const cards = [
+      { title: 'Pilar 1 — Puntaje', value: p1Puntaje !== null ? p1Puntaje.toFixed(1) : '—',
+        meta: 'Rebate: ' + (p1R !== null ? p1R + '%' : '—'),
+        color: p1Puntaje === null ? 'neutro' : p1Puntaje >= 90 ? 'verde' : p1Puntaje >= 70 ? 'amarillo' : 'rojo' },
+      { title: 'NPS Post Venta', value: d.p4_nps !== null ? d.p4_nps.toFixed(1) + '%' : '—',
+        meta: 'Meta: 85,5%',
+        color: d.p4_nps === null ? 'neutro' : d.p4_nps >= 85.5 ? 'verde' : d.p4_nps >= 80 ? 'amarillo' : 'rojo' },
+      { title: 'Venta Repuestos', value: d.p1_venta_rep !== null ? d.p1_venta_rep + '%' : '—',
+        meta: 'Sub-pilar 1.1 (Peso 50%)',
+        color: d.p1_venta_rep === null ? 'neutro' : d.p1_venta_rep > 97 ? 'verde' : d.p1_venta_rep >= 85 ? 'amarillo' : 'rojo' },
+      { title: 'Paso Vehicular', value: d.p1_paso_veh !== null ? d.p1_paso_veh + '%' : '—',
+        meta: 'Sub-pilar 1.2 (Peso 20%)',
+        color: d.p1_paso_veh === null ? 'neutro' : d.p1_paso_veh > 97 ? 'verde' : d.p1_paso_veh >= 85 ? 'amarillo' : 'rojo' },
+      { title: 'Campañas Servicio', value: d.p1_campanas !== null ? d.p1_campanas + '%' : '—',
+        meta: 'Sub-pilar 1.3 (Peso 10%)',
+        color: d.p1_campanas === null ? 'neutro' : d.p1_campanas >= 91 ? 'verde' : d.p1_campanas >= 70 ? 'amarillo' : 'rojo' },
+      { title: 'MPP >10% PV', value: d.p1_mpp !== null ? d.p1_mpp + '%' : '—',
+        meta: 'Sub-pilar 1.4 (Peso 20%)',
+        color: d.p1_mpp === null ? 'neutro' : d.p1_mpp > 97 ? 'verde' : d.p1_mpp >= 85 ? 'amarillo' : 'rojo' },
+      { title: 'Rebate DMI', value: p2R !== null ? p2R + '%' : '—',
+        meta: 'Pilar 2 · Meta: 100% DMI',
+        color: p2R === null ? 'neutro' : p2R > 0 ? 'verde' : 'rojo' },
+      { title: 'Rebate D&P/Seguros', value: p3R !== null ? (p3R.seg + p3R.dyp) + '%' : '—',
+        meta: 'Pilar 3 · Máx. 20%',
+        color: p3R === null ? 'neutro' : (p3R.seg + p3R.dyp) >= 20 ? 'verde' : (p3R.seg + p3R.dyp) > 0 ? 'amarillo' : 'rojo' },
+      { title: 'Rebate NPS', value: p4R !== null ? p4R + '%' : '—',
+        meta: 'Pilar 4 · Fact. auto',
+        color: p4R === null ? 'neutro' : p4R > 0 ? 'verde' : 'rojo' },
+      { title: 'Service Cars', value: scMin !== null ? (d.sc_autos || 0) + '/' + scMin : '—',
+        meta: `Mínimo req. para ${d.sc_pv || '?'} PV`,
+        color: scMin === null ? 'neutro' : scOk ? 'verde' : 'rojo' },
+      { title: 'Cert. Lv.1 HMC', value: d.cap_cert1 !== null ? d.cap_cert1 + '%' : '—',
+        meta: 'Meta: 90%',
+        color: d.cap_cert1 === null ? 'neutro' : d.cap_cert1 >= 90 ? 'verde' : d.cap_cert1 >= 80 ? 'amarillo' : 'rojo' },
+      { title: 'Cert. Lv.2 HMC', value: d.cap_cert2 !== null ? d.cap_cert2 + '%' : '—',
+        meta: 'Meta: 70%',
+        color: d.cap_cert2 === null ? 'neutro' : d.cap_cert2 >= 70 ? 'verde' : d.cap_cert2 >= 60 ? 'amarillo' : 'rojo' },
+    ];
+
+    // Meta PV card
+    const metaPV = getMetaPV(sucursal, mes);
+    const pvReal = d.p1_paso_veh_real;
+    if (metaPV) {
+      cards.push({
+        title: '🎯 Meta PV — ' + mes.replace('2026-','') + '/2026',
+        value: pvReal !== null ? `${pvReal}/${metaPV}` : `Meta: ${metaPV}`,
+        meta: pvReal !== null ? `${(pvReal/metaPV*100).toFixed(1)}% de cumplimiento` : 'Ingrese PV real en Pilar 1',
+        color: pvReal === null ? 'neutro' : pvReal >= metaPV ? 'verde' : pvReal >= metaPV*0.9 ? 'amarillo' : 'rojo'
+      });
+    }
+
+    // Clear Mechanic card
+    const cmR = getCMResult(d);
+    cards.push({
+      title: '🔧 Clear Mechanic',
+      value: cmR === null ? '—' : (cmR.noPaga ? 'No Paga' : 'PAGA'),
+      meta: cmR === null ? 'Sin datos' : (cmR.noPaga ? 'Cumple los 3 KPIs' : 'USD $440 · Revisa CM'),
+      color: cmR === null ? 'neutro' : cmR.noPaga ? 'verde' : 'rojo'
+    });
+
+    document.getElementById('summary-cards').innerHTML = cards.map(c => `
+      <div class="card ${c.color}">
+        <div class="card-title">${c.title}</div>
+        <div class="card-value">${c.value}</div>
+        <div class="card-meta">${c.meta}</div>
+      </div>`).join('');
+
+    renderRadial(p1Puntaje, d);
+    renderEstadoGeneral(d, p1R, p2R, p3R, p4R, scOk);
+  }
+
+  function renderRadial(puntaje, d) {
+    const ctx = document.getElementById('chart-radial');
+    if (!ctx) return;
+    if (chartRadial) chartRadial.destroy();
+    const vals = [
+      d.p1_venta_rep || 0, d.p1_paso_veh || 0,
+      d.p1_campanas || 0, d.p1_mpp || 0
+    ];
+    chartRadial = new Chart(ctx, {
+      type: 'radar',
+      data: {
+        labels: ['Venta Rep. (50%)', 'Paso Veh. (20%)', 'Campañas (10%)', 'MPP (20%)'],
+        datasets: [{
+          label: 'Cumplimiento %',
+          data: vals,
+          borderColor: '#002C5F',
+          backgroundColor: 'rgba(0,44,95,0.15)',
+          pointBackgroundColor: '#00AAD2',
+          pointRadius: 5,
+        }]
+      },
+      options: {
+        responsive: true, maintainAspectRatio: false,
+        scales: { r: { min: 0, max: 120, ticks: { stepSize: 20 }, grid: { color: '#e2e8f0' } } },
+        plugins: { legend: { display: false } }
+      }
+    });
+  }
+
+  function renderEstadoGeneral(d, p1R, p2R, p3R, p4R, scOk) {
+    const rows = [
+      { kpi: 'Llaves Pilar 1', ok: d.p1_llave1 && d.p1_llave2, detail: 'Info día 3 + NPS ≥75%' },
+      { kpi: 'Rebate 1 Excelencia', ok: p1R > 0, detail: p1R !== null ? p1R + '%' : '—' },
+      { kpi: 'Rebate 2 DMI', ok: p2R > 0, detail: p2R !== null ? p2R + '%' : '—' },
+      { kpi: 'Rebate 3 D&P', ok: p3R && (p3R.seg + p3R.dyp) > 0, detail: p3R ? (p3R.seg+p3R.dyp)+'%' : '—' },
+      { kpi: 'Rebate 4 NPS', ok: p4R > 0, detail: p4R !== null ? p4R + '%' : '—' },
+      { kpi: 'NPS ≥ 85,5%', ok: d.p4_nps >= 85.5, detail: d.p4_nps !== null ? d.p4_nps.toFixed(1)+'%' : '—' },
+      { kpi: 'Tasa Respuesta ≥ 35%', ok: d.p4_tasa_resp >= 35, detail: d.p4_tasa_resp !== null ? d.p4_tasa_resp+'%' : '—' },
+      { kpi: 'Service Cars', ok: scOk, detail: d.sc_pv !== null ? `${d.sc_autos||0}/${scMinimo(d.sc_pv)} autos` : '—' },
+      { kpi: 'Cert. HMC Lv.1 ≥ 90%', ok: d.cap_cert1 >= 90, detail: d.cap_cert1 !== null ? d.cap_cert1+'%' : '—' },
+      { kpi: 'Cert. HMC Lv.2 ≥ 70%', ok: d.cap_cert2 >= 70, detail: d.cap_cert2 !== null ? d.cap_cert2+'%' : '—' },
+    ];
+    const cmR2 = getCMResult(d);
+    if (cmR2) {
+      rows.push({ kpi: 'CM % Envío ≥100%', ok: cmR2.envioOk, detail: cmR2.pctEnvio !== null ? cmR2.pctEnvio.toFixed(1)+'%' : '—' });
+      rows.push({ kpi: 'CM % Cotización ≥50%', ok: cmR2.cotOk, detail: cmR2.pctCot !== null ? cmR2.pctCot.toFixed(1)+'%' : '—' });
+      rows.push({ kpi: 'CM % Aprobación ≥15%', ok: cmR2.aproOk, detail: cmR2.pctApro !== null ? cmR2.pctApro.toFixed(1)+'%' : '—' });
+      rows.push({ kpi: 'Clear Mechanic — Licencia', ok: cmR2.noPaga, detail: cmR2.noPaga ? 'No Paga' : 'Paga USD $440' });
+    }
+
+    document.getElementById('estado-general').innerHTML = `
+      <div class="table-wrap">
+      <table>
+        <thead><tr><th>KPI</th><th>Estado</th><th>Valor</th></tr></thead>
+        <tbody>${rows.map(r => `
+          <tr>
+            <td style="font-size:13px">${r.kpi}</td>
+            <td>${r.detail === '—' ? badge('Sin datos','gris') : r.ok ? badge('✓ OK','verde') : badge('✗ Falla','rojo')}</td>
+            <td style="font-size:13px;color:var(--texto2)">${r.detail}</td>
+          </tr>`).join('')}
+        </tbody>
+      </table>
+      </div>`;
+  }
+
+  // ── HISTORICO ─────────────────────────────────────────────
+  function renderHistorico() {
+    const suc = getSucursales();
+    const indicador = document.getElementById('hist-indicador')?.value || 'p1_venta_rep';
+    const meses = [];
+    const now = new Date();
+    for (let i = 11; i >= 0; i--) {
+      const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
+      meses.push(`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`);
+    }
+
+    const datasets = suc.map((s, idx) => {
+      const colors = ['#002C5F','#00AAD2','#22c55e','#f59e0b','#ef4444','#8b5cf6'];
+      const col = colors[idx % colors.length];
+      const data = meses.map(m => {
+        const d = getData(s, m);
+        if (indicador === 'p1_puntaje') return calcPilar1Score(d);
+        if (indicador === 'cm_pct_envio') { const r = getCMResult(d); return r ? r.pctEnvio : null; }
+        if (indicador === 'cm_pct_cot')   { const r = getCMResult(d); return r ? r.pctCot   : null; }
+        if (indicador === 'cm_pct_apro')  { const r = getCMResult(d); return r ? r.pctApro  : null; }
+        return d[indicador] || null;
+      });
+      return { label: s, data, borderColor: col, backgroundColor: col+'22',
+        tension: 0.3, pointRadius: 4, fill: false };
+    });
+
+    const ctx = document.getElementById('chart-historico');
+    if (chartHist) chartHist.destroy();
+    chartHist = new Chart(ctx, {
+      type: 'line',
+      data: { labels: meses, datasets },
+      options: {
+        responsive: true, maintainAspectRatio: false,
+        plugins: { legend: { position: 'top' }, tooltip: { mode: 'index' } },
+        scales: { y: { beginAtZero: false } }
+      }
+    });
+
+    // Tabla
+    const th = `<tr><th>Sucursal</th>${meses.map(m=>`<th>${m}</th>`).join('')}</tr>`;
+    const tb = suc.map(s => {
+      const vals = meses.map(m => {
+        const d = getData(s, m);
+        let v;
+        if (indicador === 'p1_puntaje') v = calcPilar1Score(d);
+        else if (indicador === 'cm_pct_envio') { const r = getCMResult(d); v = r ? r.pctEnvio : null; }
+        else if (indicador === 'cm_pct_cot')   { const r = getCMResult(d); v = r ? r.pctCot   : null; }
+        else if (indicador === 'cm_pct_apro')  { const r = getCMResult(d); v = r ? r.pctApro  : null; }
+        else v = d[indicador];
+        return `<td style="text-align:center">${v !== null && v !== undefined ? (typeof v === 'number' ? v.toFixed(1) : v) : '—'}</td>`;
+      }).join('');
+      return `<tr><td><strong>${s}</strong></td>${vals}</tr>`;
+    }).join('');
+
+    document.getElementById('tabla-historico').innerHTML = `
+      <div class="table-wrap"><table>
+        <thead>${th}</thead><tbody>${tb}</tbody>
+      </table></div>`;
+  }
+
+  // ── Modal sucursal ────────────────────────────────────────
+  function openModalSucursal() { document.getElementById('modal-sucursal').classList.remove('hidden'); }
+  function closeModalSucursal() { document.getElementById('modal-sucursal').classList.add('hidden'); }
+  function agregarSucursal() {
+    const inp = document.getElementById('nueva-sucursal-input');
+    const nombre = inp.value.trim();
+    if (!nombre) return;
+    if (!store.sucursales) store.sucursales = ['Principal'];
+    if (!store.sucursales.includes(nombre)) store.sucursales.push(nombre);
+    sucursal = nombre;
+    saveStore(store);
+    inp.value = '';
+    closeModalSucursal();
+    renderSucursales();
+    loadFormValues();
+    renderDashboard();
+  }
+
+  function cambiarSucursal(s) { sucursal = s; loadFormValues(); renderDashboard(); if (currentTab==='metas') renderTabMetas(); if (currentTab==='clearmechanic') { calcCM(); renderCMConsolidado(); } }
+  function cambiarMes(m) { mes = m; loadFormValues(); renderDashboard(); if (currentTab==='metas') renderTabMetas(); if (currentTab==='clearmechanic') { calcCM(); renderCMConsolidado(); } }
+  function guardarDatos() { collectForm(); saveStore(store); showToast('✓ Datos guardados correctamente'); }
+
+  function showToast(msg) {
+    const t = document.createElement('div');
+    t.style.cssText = 'position:fixed;bottom:24px;right:24px;background:#002C5F;color:#fff;padding:12px 20px;border-radius:8px;font-size:13px;font-weight:600;z-index:999;box-shadow:0 4px 12px rgba(0,0,0,.3)';
+    t.textContent = msg;
+    document.body.appendChild(t);
+    setTimeout(() => t.remove(), 2500);
+  }
+
+  // ── INIT ─────────────────────────────────────────────────
+  function init() {
+    if (!store.sucursales) store.sucursales = ['Principal'];
+    sucursal = store.sucursales[0];
+    mes = document.getElementById('sel-mes').value;
+    renderSucursales();
+    loadFormValues();
+    renderDashboard();
+
+    // Close modal on overlay click
+    document.getElementById('modal-sucursal').addEventListener('click', function(e) {
+      if (e.target === this) closeModalSucursal();
+    });
+    // Enter en input sucursal
+    document.getElementById('nueva-sucursal-input').addEventListener('keydown', e => {
+      if (e.key === 'Enter') agregarSucursal();
+    });
+  }
+
+  return { setTab, cambiarSucursal, cambiarMes, guardarDatos, calcP1, calcP1PVReal, calcP2, calcP3, calcP4, calcSC, calcCap,
+    calcCM, renderCMConsolidado, renderTabMetas, setLlave, openModalSucursal, closeModalSucursal, agregarSucursal, renderHistorico, init };
+})();
+
+window.addEventListener('DOMContentLoaded', () => app.init());
+</script>
+</body>
+</html>
