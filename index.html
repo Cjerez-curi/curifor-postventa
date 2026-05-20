@@ -1138,6 +1138,51 @@ tbody tr.highlight:hover td{background:#dfeaf9}
 // ═══════════════════════════════════════════════════════════════
 const STORAGE_KEY = 'hyundai_pv_2026';
 
+// ── GITHUB SYNC (datos compartidos entre usuarios) ─────────────────────────
+const _GHu = 'Cjerez-curi';
+const _GHr = 'curifor-postventa';
+const _GHf = 'datos_hyundai.json';
+const _GH_RAW = `https://raw.githubusercontent.com/${_GHu}/${_GHr}/main/${_GHf}`;
+const _GH_API = `https://api.github.com/repos/${_GHu}/${_GHr}/contents/${_GHf}`;
+const _TK_KEY = 'curifor_gh_token';
+
+async function cargarDesdeGitHub() {
+  try {
+    const r = await fetch(_GH_RAW + '?t=' + Date.now(), { cache: 'no-store' });
+    if (!r.ok) return;
+    const data = await r.json();
+    if (data && typeof data === 'object') {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+    }
+  } catch(e) { /* fallback a localStorage si no hay red */ }
+}
+
+async function subirAGitHub(data) {
+  let tk = localStorage.getItem(_TK_KEY);
+  if (!tk) {
+    tk = prompt('🔑 Primera sincronización con el equipo\n\nIngresa el token de acceso (pídelo a Cristóbal).\nSolo se pedirá una vez en este navegador:');
+    if (!tk) return;
+    localStorage.setItem(_TK_KEY, tk.trim());
+  }
+  try {
+    const hdrs = {
+      'Authorization': `token ${tk.trim()}`,
+      'Accept': 'application/vnd.github.v3+json',
+      'Content-Type': 'application/json'
+    };
+    let sha;
+    try {
+      const g = await fetch(_GH_API, { headers: hdrs });
+      if (g.ok) sha = (await g.json()).sha;
+      else if (g.status === 401) { localStorage.removeItem(_TK_KEY); return; }
+    } catch(e) {}
+    const contenido = btoa(unescape(encodeURIComponent(JSON.stringify(data, null, 2))));
+    const body = { message: 'Actualizar KPI Hyundai', content: contenido, ...(sha ? {sha} : {}) };
+    const res = await fetch(_GH_API, { method: 'PUT', headers: hdrs, body: JSON.stringify(body) });
+    if (res.status === 401) localStorage.removeItem(_TK_KEY);
+  } catch(e) { /* guardado local OK aunque falle GitHub */ }
+}
+
 // ═══════════════════════════════════════════════════════════════
 //  METAS ANUALES 2026
 // ═══════════════════════════════════════════════════════════════
@@ -1185,7 +1230,10 @@ function defaultData() {
 function loadStore() {
   try { return JSON.parse(localStorage.getItem(STORAGE_KEY)) || {}; } catch(e) { return {}; }
 }
-function saveStore(st) { localStorage.setItem(STORAGE_KEY, JSON.stringify(st)); }
+function saveStore(st) {
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(st));
+  subirAGitHub(st);
+}
 
 // ═══════════════════════════════════════════════════════════════
 //  LÓGICA DE CÁLCULO
@@ -2012,7 +2060,7 @@ const app = (() => {
 
   function cambiarSucursal(s) { sucursal = s; loadFormValues(); renderDashboard(); if (currentTab==='metas') renderTabMetas(); if (currentTab==='clearmechanic') { calcCM(); renderCMConsolidado(); } }
   function cambiarMes(m) { mes = m; loadFormValues(); renderDashboard(); if (currentTab==='metas') renderTabMetas(); if (currentTab==='clearmechanic') { calcCM(); renderCMConsolidado(); } }
-  function guardarDatos() { collectForm(); saveStore(store); showToast('✓ Datos guardados correctamente'); }
+  function guardarDatos() { collectForm(); saveStore(store); showToast('✓ Guardado · sincronizando con equipo...'); }
 
   function showToast(msg) {
     const t = document.createElement('div');
@@ -2066,17 +2114,17 @@ function loginCheck() {
   document.getElementById('login-overlay').style.display = 'none';
 }
 
-window.addEventListener('DOMContentLoaded', () => {
-  // Enter en campos del login
+window.addEventListener('DOMContentLoaded', async () => {
   ['login-email','login-pwd'].forEach(id => {
     document.getElementById(id).addEventListener('keydown', e => {
       if (e.key === 'Enter') loginCheck();
     });
   });
-  // Si ya hay sesión guardada, ocultar el login
   if (localStorage.getItem(LOGIN_KEY)) {
     document.getElementById('login-overlay').style.display = 'none';
   }
+  // Cargar datos compartidos desde GitHub antes de inicializar la app
+  await cargarDesdeGitHub();
   app.init();
 });
 </script>
