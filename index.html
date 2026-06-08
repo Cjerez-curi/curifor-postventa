@@ -1640,16 +1640,10 @@ const app = (() => {
         '<td style="padding:6px 10px;font-weight:500;white-space:nowrap">' + suc.nombre + '</td>' +
         '<td style="padding:6px 8px;text-align:center;color:#888;font-size:0.78rem">' + RUT_CURIFOR + '</td>' +
         '<td style="padding:6px 8px;text-align:center;color:#888;font-size:0.78rem">' + suc.dmi + '</td>' +
-        '<td style="padding:4px 6px"><input type="text" class="dmi-input" value="' + fmtNum(meta) + '"' +
-          ' onchange="app.saveP2Cell('' + suc.nombre + '','meta',this.value.replace(/[^0-9]/g,''))"' +
-          ' placeholder="0" /></td>' +
-        '<td style="padding:4px 6px"><input type="text" class="dmi-input" value="' + fmtNum(fact) + '"' +
-          ' onchange="app.saveP2Cell('' + suc.nombre + '','facturado',this.value.replace(/[^0-9]/g,''))"' +
-          ' placeholder="0" /></td>' +
+        '<td style="padding:4px 6px"><input type="text" class="dmi-input" value="' + fmtNum(meta) + '" data-suc="' + suc.nombre + '" data-field="meta" onchange="app.saveP2Cell(this.dataset.suc,this.dataset.field,this.value)" placeholder="0" /></td>' +
+        '<td style="padding:4px 6px"><input type="text" class="dmi-input" value="' + fmtNum(fact) + '" data-suc="' + suc.nombre + '" data-field="facturado" onchange="app.saveP2Cell(this.dataset.suc,this.dataset.field,this.value)" placeholder="0" /></td>' +
         '<td style="padding:6px 8px;text-align:right;color:#444">' + proyText + '</td>' +
-        '<td style="padding:6px 8px;text-align:center">' +
-          '<span class="cumpl-badge" style="' + badgeStyle + '">' + badgeText + '</span>' +
-        '</td>' +
+        '<td style="padding:6px 8px;text-align:center"><span class="cumpl-badge" style="' + badgeStyle + '">' + badgeText + '</span></td>' +
       '</tr>';
     });
 
