@@ -9,7 +9,7 @@
         "p1_llave2": true,
         "p1_venta_rep": null,
         "p1_paso_veh": 155,
-        "p1_paso_veh_real": null,
+        "p1_paso_veh_real": 1,
         "p1_campanas": null,
         "p1_mpp": null,
         "p2_cumpl": null,
