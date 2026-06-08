@@ -29,7 +29,7 @@
         "sc_dias_adicional": 0,
         "sc_modelo": "",
         "cap_pres": 15,
-        "cap_pres_falt": 15,
+        "cap_pres_falt": 0,
         "cap_online": 100,
         "cap_online_falt": 0,
         "cap_id_viz": null,
