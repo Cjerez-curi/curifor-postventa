@@ -7,10 +7,10 @@
       "2026-05": {
         "p1_llave1": true,
         "p1_llave2": true,
-        "p1_venta_rep": null,
+        "p1_venta_rep": 70,
         "p1_paso_veh": 155,
         "p1_paso_veh_real": 273,
-        "p1_campanas": 10,
+        "p1_campanas": 100,
         "p1_mpp": null,
         "p2_cumpl": null,
         "p2_vor_cargo": 0,
@@ -462,7 +462,7 @@
       }
     }
   },
-  "_syncTs": "8/6, 05:52 p. m.",
+  "_syncTs": "8/6, 05:53 p. m.",
   "p2table": {
     "2026-05": {}
   }
