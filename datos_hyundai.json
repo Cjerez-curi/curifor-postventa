@@ -30,7 +30,7 @@
         "sc_modelo": "",
         "cap_pres": null,
         "cap_pres_falt": 0,
-        "cap_online": null,
+        "cap_online": 1,
         "cap_online_falt": 0,
         "cap_id_viz": null,
         "cap_id_comp": null,
