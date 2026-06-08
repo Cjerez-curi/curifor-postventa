@@ -11,7 +11,7 @@
         "p1_paso_veh": 79.1,
         "p1_paso_veh_real": 153,
         "p1_campanas": 100,
-        "p1_mpp": null,
+        "p1_mpp": 0,
         "p2_cumpl": null,
         "p2_vor_cargo": 0,
         "p2_facturacion": null,
