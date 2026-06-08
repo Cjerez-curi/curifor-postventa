@@ -9,7 +9,7 @@
         "p1_llave2": true,
         "p1_venta_rep": 38.48,
         "p1_paso_veh": 73,
-        "p1_paso_veh_real": null,
+        "p1_paso_veh_real": 1,
         "p1_campanas": 97,
         "p1_mpp": 100,
         "p2_cumpl": 70.1,
