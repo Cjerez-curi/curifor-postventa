@@ -317,11 +317,7 @@ tbody tr.highlight:hover td{background:#dfeaf9}
     <h2>Plataforma<br/><b>Post Venta.</b></h2>
     <div class="login-sub">Indicadores comerciales · Política 2026.</div>
     <div class="login-field">
-      <label>Correo institucional</label>
-      <input type="email" id="login-email" placeholder="usuario@curifor.com" autocomplete="email"/>
-    </div>
-    <div class="login-field">
-      <label>Contrase&ntilde;a</label>
+      <label>Contraseña de acceso</label>
       <input type="password" id="login-pwd" placeholder="••••••••" autocomplete="current-password"/>
     </div>
     <button class="login-btn" onclick="loginCheck()">
@@ -329,7 +325,7 @@ tbody tr.highlight:hover td{background:#dfeaf9}
       <span class="arrow">→</span>
     </button>
     <div class="login-error" id="login-error"></div>
-    <div class="login-footer">Acceso restringido a personal autorizado de Curifor S.A. Las credenciales son personales e intransferibles.</div>
+    <div class="login-footer">Acceso restringido a personal de Curifor S.A.</div>
   </div>
 </div>
 
@@ -2267,18 +2263,14 @@ const DOMINIO   = '@curifor.com';
 const PASSWORD  = 'CPV2026';
 
 function loginCheck() {
-  const email = document.getElementById('login-email').value.trim().toLowerCase();
   const pwd   = document.getElementById('login-pwd').value;
   const errEl = document.getElementById('login-error');
-  if (!email.endsWith(DOMINIO)) {
-    errEl.textContent = 'El correo debe terminar en @curifor.com';
-    return;
-  }
   if (pwd !== PASSWORD) {
     errEl.textContent = 'Contraseña incorrecta.';
+    errEl.style.display = 'block';
     return;
   }
-  localStorage.setItem(LOGIN_KEY, email);
+  localStorage.setItem(LOGIN_KEY, 'equipo@curifor.com');
   document.getElementById('login-overlay').style.display = 'none';
 }
 
@@ -2290,10 +2282,9 @@ async function syncManual() {
 }
 
 window.addEventListener('DOMContentLoaded', async () => {
-  ['login-email','login-pwd'].forEach(id => {
-    document.getElementById(id).addEventListener('keydown', e => {
-      if (e.key === 'Enter') loginCheck();
-    });
+  const pwdEl = document.getElementById('login-pwd');
+  if (pwdEl) pwdEl.addEventListener('keydown', e => {
+    if (e.key === 'Enter') loginCheck();
   });
   if (localStorage.getItem(LOGIN_KEY)) {
     document.getElementById('login-overlay').style.display = 'none';
