@@ -10,7 +10,7 @@
         "p1_venta_rep": null,
         "p1_paso_veh": 155,
         "p1_paso_veh_real": 273,
-        "p1_campanas": null,
+        "p1_campanas": 10,
         "p1_mpp": null,
         "p2_cumpl": null,
         "p2_vor_cargo": 0,
