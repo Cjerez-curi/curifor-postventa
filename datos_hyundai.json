@@ -28,7 +28,7 @@
         "sc_autos": 0,
         "sc_dias_adicional": 0,
         "sc_modelo": "",
-        "cap_pres": 100,
+        "cap_pres": null,
         "cap_pres_falt": 0,
         "cap_online": 100,
         "cap_online_falt": 0,
