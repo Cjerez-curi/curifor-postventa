@@ -19,8 +19,8 @@
         "p3_dyp": null,
         "p3_fact_seguros": null,
         "p3_fact_dyp": null,
-        "p4_nps": 85.9,
-        "p4_tasa_resp": 47.8,
+        "p4_nps": null,
+        "p4_tasa_resp": null,
         "p4_facturacion": null,
         "p4_n_resp": null,
         "p4_n_total": null,
@@ -462,9 +462,8 @@
       }
     }
   },
-  "_syncTs": "8/6, 05:50 p. m.",
+  "_syncTs": "8/6, 05:56 p. m.",
   "p2table": {
-    "2026-05": {},
-    "2026-04": {}
+    "2026-05": {}
   }
 }
