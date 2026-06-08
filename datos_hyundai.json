@@ -39,8 +39,8 @@
         "cap_uf": 38500,
         "cm_ot": 153,
         "cm_envios": 153,
-        "cm_cotizacion": 70,
-        "cm_aprobado": 5
+        "cm_cotizacion": 0,
+        "cm_aprobado": 50
       },
       "2025-06": {
         "p1_llave1": true,
