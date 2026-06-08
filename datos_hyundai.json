@@ -37,7 +37,7 @@
         "cap_cert1": null,
         "cap_cert2": null,
         "cap_uf": 38500,
-        "cm_ot": null,
+        "cm_ot": 1,
         "cm_envios": null,
         "cm_cotizacion": null,
         "cm_aprobado": null
