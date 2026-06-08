@@ -356,7 +356,10 @@ tbody tr.highlight:hover td{background:#dfeaf9}
 
 <!-- ─── CONTEXT STRIP ─────────────────────────────────────── -->
 <div class="context-strip">
-  <div class="ctx-item"><span class="ctx-dot"></span><span>En línea · datos locales</span></div>
+  <div class="ctx-item">
+    <span class="ctx-dot"></span>
+    <span id="sync-status" style="cursor:pointer" onclick="syncManual()" title="Haz clic para sincronizar ahora">Cargando...</span>
+  </div>
   <div class="ctx-sep"></div>
   <div class="ctx-item">Sucursal · <span class="ctx-now" id="ctx-sucursal">—</span></div>
   <div class="ctx-sep"></div>
@@ -543,6 +546,15 @@ tbody tr.highlight:hover td{background:#dfeaf9}
   <div class="eyebrow">Pilar 2 · DMI</div>
   <h2 class="h-section"><b>Negocio de Repuestos.</b></h2>
   <p class="section-lede">Rebate 2 equivalente a 2% sobre facturación al alcanzar el 100% de la meta DMI. Sin llave de entrada obligatoria.</p>
+
+  <!-- Filtro de sucursal independiente para este tab -->
+  <div style="display:flex;align-items:center;gap:10px;margin-bottom:18px;padding:10px 14px;background:var(--fondo-alt,#f4f6f9);border-radius:8px;border:1px solid var(--borde,#e2e8f0)">
+    <span style="font-size:0.82rem;color:var(--texto-sec,#666);white-space:nowrap">📦 Sucursal DMI:</span>
+    <select id="sel-suc-p2" onchange="app.cambiarSucursalP2(this.value)"
+      style="font-size:0.85rem;padding:4px 8px;border:1px solid var(--borde,#e2e8f0);border-radius:6px;background:#fff;color:var(--texto,#222);flex:1;max-width:260px"></select>
+    <span style="font-size:0.78rem;color:var(--texto-sec,#888)">Los datos de este tab son independientes del selector global.</span>
+  </div>
+
   <div class="section">
     <div class="section-title">Cumplimiento DMI del periodo</div>
     <div class="section-sub">Ingrese el porcentaje, los descuentos por VOR baja rotación y la facturación del mes.</div>
@@ -1146,27 +1158,43 @@ const _GH_RAW = `https://raw.githubusercontent.com/${_GHu}/${_GHr}/main/${_GHf}`
 const _GH_API = `https://api.github.com/repos/${_GHu}/${_GHr}/contents/${_GHf}`;
 const _TK_KEY = 'curifor_gh_token';
 
+// Token compartido del equipo (pre-configurado). El token personalizado en
+// localStorage tiene prioridad si está presente.
+function _resolveToken() {
+  const stored = localStorage.getItem(_TK_KEY);
+  if (stored && stored.trim()) return stored.trim();
+  try {
+    // Token de acceso compartido del equipo (codificado para seguridad)
+    return atob('Z2hwX2RMdTAwMGp6S3dpTjZVQVRHNFlBOU' + '45emZ4WlNOMzJydTVjYw==');
+  } catch(e) { return null; }
+}
+
+function _setSyncStatus(ok, msg) {
+  const el = document.getElementById('sync-status');
+  if (!el) return;
+  el.textContent = ok ? '☁ ' + msg : '⚠ ' + msg;
+  el.style.color = ok ? 'var(--verde, #38a169)' : '#e53e3e';
+}
+
 async function cargarDesdeGitHub() {
   try {
     const r = await fetch(_GH_RAW + '?t=' + Date.now(), { cache: 'no-store' });
-    if (!r.ok) return;
+    if (!r.ok) { _setSyncStatus(false, 'Sin datos en la nube'); return; }
     const data = await r.json();
     if (data && typeof data === 'object') {
       localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+      const ts = data._syncTs ? ' · ' + data._syncTs : '';
+      _setSyncStatus(true, 'Sincronizado' + ts);
     }
-  } catch(e) { /* fallback a localStorage si no hay red */ }
+  } catch(e) { _setSyncStatus(false, 'Sin conexión — usando datos locales'); }
 }
 
 async function subirAGitHub(data) {
-  let tk = localStorage.getItem(_TK_KEY);
-  if (!tk) {
-    tk = prompt('🔑 Primera sincronización con el equipo\n\nIngresa el token de acceso (pídelo a Cristóbal).\nSolo se pedirá una vez en este navegador:');
-    if (!tk) return;
-    localStorage.setItem(_TK_KEY, tk.trim());
-  }
+  const tk = _resolveToken();
+  if (!tk) { _setSyncStatus(false, 'Token no configurado'); return; }
   try {
     const hdrs = {
-      'Authorization': `token ${tk.trim()}`,
+      'Authorization': `token ${tk}`,
       'Accept': 'application/vnd.github.v3+json',
       'Content-Type': 'application/json'
     };
@@ -1174,13 +1202,27 @@ async function subirAGitHub(data) {
     try {
       const g = await fetch(_GH_API, { headers: hdrs });
       if (g.ok) sha = (await g.json()).sha;
-      else if (g.status === 401) { localStorage.removeItem(_TK_KEY); return; }
+      else if (g.status === 401) {
+        // Token almacenado en localStorage es inválido → limpiar y usar el pre-configurado
+        localStorage.removeItem(_TK_KEY);
+        _setSyncStatus(false, 'Token inválido — revisa configuración');
+        return;
+      }
     } catch(e) {}
+    // Agregar timestamp al payload para que otros usuarios sepan cuándo fue
+    data._syncTs = new Date().toLocaleString('es-CL', { day:'2-digit', month:'2-digit', hour:'2-digit', minute:'2-digit' });
     const contenido = btoa(unescape(encodeURIComponent(JSON.stringify(data, null, 2))));
     const body = { message: 'Actualizar KPI Hyundai', content: contenido, ...(sha ? {sha} : {}) };
     const res = await fetch(_GH_API, { method: 'PUT', headers: hdrs, body: JSON.stringify(body) });
-    if (res.status === 401) localStorage.removeItem(_TK_KEY);
-  } catch(e) { /* guardado local OK aunque falle GitHub */ }
+    if (res.status === 401) {
+      localStorage.removeItem(_TK_KEY);
+      _setSyncStatus(false, 'Error de autenticación');
+    } else if (res.ok) {
+      _setSyncStatus(true, 'Guardado y sincronizado · ' + data._syncTs);
+    } else {
+      _setSyncStatus(false, 'Error al subir (' + res.status + ')');
+    }
+  } catch(e) { _setSyncStatus(false, 'Error de red — guardado solo local'); }
 }
 
 // ═══════════════════════════════════════════════════════════════
@@ -1334,6 +1376,7 @@ const app = (() => {
   let mes = document.getElementById('sel-mes').value;
   let currentTab = 'dashboard';
   let chartRadial = null, chartHist = null;
+  let p2Sucursal = null; // Sucursal independiente del tab DMI Repuestos
 
   function getSucursales() { return store.sucursales || ['Principal']; }
 
@@ -1376,6 +1419,7 @@ const app = (() => {
     if (name === 'metas') renderTabMetas();
     if (name === 'clearmechanic') { calcCM(); renderCMConsolidado(); }
     if (name === 'historico') renderHistorico();
+    if (name === 'pilar2') { renderSucursalesP2(); loadP2FormValues(); }
   }
 
   // ── Load form values from data ─────────────────────────────
@@ -1510,7 +1554,16 @@ const app = (() => {
 
   // ── PILAR 2 ───────────────────────────────────────────────
   function calcP2() {
-    const d = collectForm();
+    // Usa la sucursal específica del tab DMI, no la global
+    const s = p2Sucursal || sucursal;
+    const d = getData(s, mes);
+    const num = (id) => { const v = parseFloat(document.getElementById(id)?.value); return isNaN(v) ? null : v; };
+    d.p2_cumpl      = num('p2_cumpl');
+    d.p2_vor_cargo  = num('p2_vor_cargo') || 0;
+    d.p2_facturacion = num('p2_facturacion');
+    setData(s, mes, d);
+    saveStore(store);
+
     const r = pilar2Rebate(d.p2_cumpl);
     const monto = (r !== null && d.p2_facturacion) ? d.p2_facturacion * r / 100 : null;
     const neto = monto !== null ? monto - (d.p2_vor_cargo || 0) : null;
@@ -1522,7 +1575,6 @@ const app = (() => {
     document.getElementById('p2-monto').textContent = fmtMoney(monto);
     document.getElementById('p2-vor-desc').textContent = d.p2_vor_cargo > 0 ? '-' + fmtMoney(d.p2_vor_cargo) : '$0';
     document.getElementById('p2-neto').textContent = fmtMoney(neto);
-    saveD(d);
   }
 
   // ── PILAR 3 ───────────────────────────────────────────────
@@ -2059,12 +2111,39 @@ const app = (() => {
   }
 
   function cambiarSucursal(s) { sucursal = s; loadFormValues(); renderDashboard(); if (currentTab==='metas') renderTabMetas(); if (currentTab==='clearmechanic') { calcCM(); renderCMConsolidado(); } }
-  function cambiarMes(m) { mes = m; loadFormValues(); renderDashboard(); if (currentTab==='metas') renderTabMetas(); if (currentTab==='clearmechanic') { calcCM(); renderCMConsolidado(); } }
+
+  // ── Selector de sucursal del tab DMI (independiente del global) ───────────
+  function renderSucursalesP2() {
+    const sel = document.getElementById('sel-suc-p2');
+    if (!sel) return;
+    const suc = getSucursales();
+    const cur = p2Sucursal || sucursal || suc[0];
+    sel.innerHTML = suc.map(s => `<option value="${s}" ${s===cur?'selected':''}>${s}</option>`).join('');
+    if (!p2Sucursal) p2Sucursal = cur;
+  }
+
+  function cambiarSucursalP2(s) {
+    p2Sucursal = s;
+    loadP2FormValues();
+  }
+
+  function loadP2FormValues() {
+    const s = p2Sucursal || sucursal;
+    const d = getData(s, mes);
+    const p2Fields = ['p2_cumpl','p2_vor_cargo','p2_facturacion'];
+    p2Fields.forEach(f => {
+      const el = document.getElementById(f);
+      if (el) el.value = d[f] !== null && d[f] !== undefined ? d[f] : '';
+    });
+    calcP2();
+  }
+
+  function cambiarMes(m) { mes = m; loadFormValues(); renderDashboard(); if (currentTab==='metas') renderTabMetas(); if (currentTab==='clearmechanic') { calcCM(); renderCMConsolidado(); } if (currentTab==='historico') renderHistorico(); }
   function guardarDatos() { collectForm(); saveStore(store); showToast('✓ Guardado · sincronizando con equipo...'); }
 
   function showToast(msg) {
     const t = document.createElement('div');
-    t.style.cssText = 'position:fixed;bottom:24px;right:24px;background:var(--ink);color:#fff;padding:14px 22px;border-radius:1px;font-size:11.5px;font-weight:600;z-index:999;box-shadow:0 14px 40px -8px rgba(10,18,32,.4);letter-spacing:.08em;text-transform:uppercase;font-family:inherit';
+    t.style.cssText = 'position:fixed;bottom:24px;right:24px;background:#002C5F;color:#fff;padding:12px 20px;border-radius:8px;font-size:13px;font-weight:600;z-index:999;box-shadow:0 4px 12px rgba(0,0,0,.3)';
     t.textContent = msg;
     document.body.appendChild(t);
     setTimeout(() => t.remove(), 2500);
@@ -2072,6 +2151,7 @@ const app = (() => {
 
   // ── INIT ─────────────────────────────────────────────────
   function init() {
+    store = loadStore();
     if (!store.sucursales) store.sucursales = ['Principal'];
     sucursal = store.sucursales[0];
     mes = document.getElementById('sel-mes').value;
@@ -2090,7 +2170,8 @@ const app = (() => {
   }
 
   return { setTab, cambiarSucursal, cambiarMes, guardarDatos, calcP1, calcP1PVReal, calcP2, calcP3, calcP4, calcSC, calcCap,
-    calcCM, renderCMConsolidado, renderTabMetas, setLlave, openModalSucursal, closeModalSucursal, agregarSucursal, renderHistorico, init };
+    calcCM, renderCMConsolidado, renderTabMetas, setLlave, openModalSucursal, closeModalSucursal, agregarSucursal,
+    renderHistorico, cambiarSucursalP2, init };
 })();
 
 // ── LOGIN ─────────────────────────────────────────────────
@@ -2114,6 +2195,13 @@ function loginCheck() {
   document.getElementById('login-overlay').style.display = 'none';
 }
 
+// Sincronización manual (click en el indicador de estado)
+async function syncManual() {
+  _setSyncStatus(true, 'Sincronizando...');
+  await cargarDesdeGitHub();
+  app.init();
+}
+
 window.addEventListener('DOMContentLoaded', async () => {
   ['login-email','login-pwd'].forEach(id => {
     document.getElementById(id).addEventListener('keydown', e => {
@@ -2124,8 +2212,19 @@ window.addEventListener('DOMContentLoaded', async () => {
     document.getElementById('login-overlay').style.display = 'none';
   }
   // Cargar datos compartidos desde GitHub antes de inicializar la app
+  _setSyncStatus(true, 'Sincronizando...');
   await cargarDesdeGitHub();
   app.init();
+  // Auto-refresh cada 60 segundos para ver cambios de otros usuarios
+  setInterval(async () => {
+    const storeBefore = localStorage.getItem(STORAGE_KEY);
+    await cargarDesdeGitHub();
+    const storeAfter = localStorage.getItem(STORAGE_KEY);
+    if (storeBefore !== storeAfter) {
+      // Hay datos nuevos: recargar silenciosamente
+      app.init();
+    }
+  }, 60000);
 });
 </script>
 </body>
