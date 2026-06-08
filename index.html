@@ -545,84 +545,72 @@ tbody tr.highlight:hover td{background:#dfeaf9}
 <div id="tab-pilar2" class="hidden">
   <div class="eyebrow">Pilar 2 · DMI</div>
   <h2 class="h-section"><b>Negocio de Repuestos.</b></h2>
-  <p class="section-lede">Rebate 2 equivalente a 2% sobre facturación al alcanzar el 100% de la meta DMI. Sin llave de entrada obligatoria.</p>
+  <p class="section-lede">Ingresa la meta y el facturado real por sucursal. La meta puede modificarse libremente cada mes.</p>
 
-  <!-- Filtro de sucursal independiente para este tab -->
-  <div style="display:flex;align-items:center;gap:10px;margin-bottom:18px;padding:10px 14px;background:var(--fondo-alt,#f4f6f9);border-radius:8px;border:1px solid var(--borde,#e2e8f0)">
-    <span style="font-size:0.82rem;color:var(--texto-sec,#666);white-space:nowrap">📦 Sucursal DMI:</span>
-    <select id="sel-suc-p2" onchange="app.cambiarSucursalP2(this.value)"
-      style="font-size:0.85rem;padding:4px 8px;border:1px solid var(--borde,#e2e8f0);border-radius:6px;background:#fff;color:var(--texto,#222);flex:1;max-width:260px"></select>
-    <span style="font-size:0.78rem;color:var(--texto-sec,#888)">Los datos de este tab son independientes del selector global.</span>
+  <!-- Encabezado de periodo + botón guardar -->
+  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;flex-wrap:wrap;gap:8px">
+    <div style="font-size:0.85rem;color:var(--texto-sec,#666)">
+      Periodo activo: <strong id="p2-mes-label" style="color:var(--celeste,#1A8FD1)">—</strong>
+      &nbsp;·&nbsp; RUT grupo: <strong>92909000-4</strong>
+    </div>
+    <div style="display:flex;gap:8px">
+      <button class="btn btn-outline" style="font-size:0.8rem;padding:5px 12px"
+        onclick="app.copiarMetasP2()" title="Copiar metas del mes anterior">⬅ Copiar metas mes ant.</button>
+      <button class="btn btn-primary" style="font-size:0.8rem;padding:5px 14px"
+        onclick="app.guardarDatos()">💾 Guardar</button>
+    </div>
   </div>
 
-  <div class="section">
-    <div class="section-title">Cumplimiento DMI del periodo</div>
-    <div class="section-sub">Ingrese el porcentaje, los descuentos por VOR baja rotación y la facturación del mes.</div>
-
-    <div class="alert alert-info">
-      ℹ Los VOR de baja rotación (categorías C y D) generan un cargo del <strong>10% al dealer</strong>, descontado del Rebate 2.
-    </div>
-
-    <div class="form-grid">
-      <div class="form-group">
-        <label>Cumplimiento Meta DMI (%)</label>
-        <input type="number" id="p2_cumpl" min="0" max="200" placeholder="ej. 100" oninput="app.calcP2()"/>
-        <div class="hint">100% = Rebate 2% · Menos del 100% = Rebate 0%</div>
-      </div>
-      <div class="form-group">
-        <label>VOR Baja Rotación (C-D) — Monto cargo</label>
-        <input type="number" id="p2_vor_cargo" min="0" placeholder="$ monto descuento" oninput="app.calcP2()"/>
-        <div class="hint">Este valor se descuenta del Rebate 2 a pagar</div>
-      </div>
-      <div class="form-group">
-        <label>Facturación del Mes ($)</label>
-        <input type="number" id="p2_facturacion" min="0" placeholder="$ facturación total" oninput="app.calcP2()"/>
-        <div class="hint">Para calcular el monto en pesos del rebate</div>
-      </div>
-    </div>
-
-    <div class="result-box" style="flex-wrap:wrap;gap:16px">
-      <div>
-        <div class="result-label">Cumplimiento</div>
-        <div class="result-value" id="p2-cumpl-badge">—</div>
-      </div>
-      <div>
-        <div class="result-label">Rebate 2</div>
-        <div class="rebate-big" id="p2-rebate" style="color:var(--verde)">—</div>
-      </div>
-      <div>
-        <div class="result-label">Monto Rebate</div>
-        <div class="result-value" id="p2-monto">—</div>
-      </div>
-      <div>
-        <div class="result-label">Desc. VOR C-D</div>
-        <div class="result-value" id="p2-vor-desc" style="color:var(--rojo)">—</div>
-      </div>
-      <div>
-        <div class="result-label">Rebate Neto</div>
-        <div class="rebate-big" id="p2-neto" style="color:var(--celeste)">—</div>
-      </div>
-    </div>
-
-    <hr class="divider"/>
-    <div class="table-wrap">
-    <table>
-      <thead><tr><th>Cumplimiento DMI</th><th>Pago Rebate 2</th></tr></thead>
-      <tbody>
-        <tr class="highlight"><td>100%</td><td>2%</td></tr>
-        <tr><td>0% – 99%</td><td>0%</td></tr>
+  <!-- TABLA PRINCIPAL -->
+  <div class="table-wrap" style="overflow-x:auto">
+    <table id="tabla-dmi-main" style="width:100%;border-collapse:collapse;font-size:0.83rem">
+      <thead>
+        <tr style="background:var(--azul,#002C5F);color:#fff">
+          <th style="padding:8px 10px;text-align:left;white-space:nowrap">Sucursal Concesionario</th>
+          <th style="padding:8px 10px;text-align:center">RUT</th>
+          <th style="padding:8px 10px;text-align:center">DMI</th>
+          <th style="padding:8px 10px;text-align:right;white-space:nowrap">Meta <span id="p2-th-mes">—</span></th>
+          <th style="padding:8px 10px;text-align:right;white-space:nowrap">Facturado Real</th>
+          <th style="padding:8px 10px;text-align:right;white-space:nowrap">Proyección Cierre</th>
+          <th style="padding:8px 10px;text-align:center;white-space:nowrap">Cumpl. Proyectado</th>
+        </tr>
+      </thead>
+      <tbody id="dmi-tbody">
+        <!-- Generado por renderP2Table() -->
       </tbody>
+      <tfoot>
+        <tr style="background:#f0f4f8;font-weight:700;border-top:2px solid #002C5F">
+          <td style="padding:8px 10px" colspan="3">TOTAL RED</td>
+          <td style="padding:8px 10px;text-align:right" id="dmi-total-meta">—</td>
+          <td style="padding:8px 10px;text-align:right" id="dmi-total-fact">—</td>
+          <td style="padding:8px 10px;text-align:right" id="dmi-total-proy">—</td>
+          <td style="padding:8px 10px;text-align:center;font-size:1rem" id="dmi-total-cumpl">—</td>
+        </tr>
+      </tfoot>
     </table>
-    </div>
+  </div>
 
-    <hr class="divider"/>
-    <div class="section-title" style="font-size:13px;margin-bottom:8px">Consideraciones adicionales</div>
-    <div class="alert alert-warn">
-      <strong>Descuentos especiales:</strong> Toda solicitud de precio especial o descuento adicional debe canalizarse al KAM y contar con aprobación del Gerente de Repuestos. Si se otorga descuento, se excluye del cálculo del rebate.
-    </div>
-    <div class="alert alert-warn">
-      <strong>Ventas por volumen sobre $4MM:</strong> Deben ser analizadas por el KAM en conjunto con el Gerente de Repuestos.
-    </div>
+  <style>
+    #tabla-dmi-main tbody tr:nth-child(even) { background:#fafafa; }
+    #tabla-dmi-main tbody tr:hover { background:#eef4fb; }
+    .dmi-input {
+      width:100%; border:1px solid transparent; background:transparent;
+      text-align:right; padding:3px 4px; border-radius:4px;
+      font-size:0.83rem; color:inherit;
+    }
+    .dmi-input:hover { border-color:#cbd5e0; background:#fff; }
+    .dmi-input:focus { outline:none; border-color:var(--celeste,#1A8FD1); background:#fff; box-shadow:0 0 0 2px rgba(26,143,209,.15); }
+    .cumpl-badge {
+      display:inline-block; padding:2px 8px; border-radius:12px;
+      font-weight:700; font-size:0.82rem;
+    }
+  </style>
+
+  <!-- Nota informativa -->
+  <div class="alert alert-info" style="margin-top:18px">
+    ℹ Rebate 2 = <strong>2% sobre facturación</strong> al alcanzar 100% de meta DMI por sucursal.
+    VOR baja rotación (C-D) genera un cargo del <strong>10%</strong> descontado del rebate.
+    <br>Descuentos especiales deben canalizarse al KAM con aprobación del Gerente de Repuestos.
   </div>
 </div>
 
@@ -1247,6 +1235,27 @@ const METAS = {
   }
 };
 const MESES_LABELS = ['','Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'];
+
+// ── SUCURSALES DMI (Pilar 2) ───────────────────────────────────────────────
+const DMI_SUCURSALES = [
+  { nombre: 'CURIFOR -C DISTR.',                      dmi: '386-7'   },
+  { nombre: 'CURIFOR CHILLAN',                         dmi: '127-9'   },
+  { nombre: 'CURIFOR CHILLAN D&P',                     dmi: '1271-8'  },
+  { nombre: 'CURIFOR CHILLAN VIEJO',                   dmi: '349-2'   },
+  { nombre: 'CURIFOR COQUIMBO',                        dmi: '128-7'   },
+  { nombre: 'CURIFOR CURICO',                          dmi: '129-5'   },
+  { nombre: 'CURIFOR CURICO D&P',                      dmi: '1290-4'  },
+  { nombre: 'CURIFOR LINDEROS',                        dmi: '131-7'   },
+  { nombre: 'CURIFOR LINDEROS D&P',                    dmi: '1310-2'  },
+  { nombre: 'CURIFOR PLACILLA',                        dmi: '133-3'   },
+  { nombre: 'CURIFOR PLACILLA D&P',                    dmi: '1330-7'  },
+  { nombre: 'CURIFOR RANCAGUA',                        dmi: '370-0'   },
+  { nombre: 'CURIFOR RANCAGUA D&P',                    dmi: '1332-3'  },
+  { nombre: 'CURIFOR SA - VICUNA MACKENNA',             dmi: '130-9'   },
+  { nombre: 'CURIFOR-PLANTA LO BLANCO D&P',             dmi: '1334-k'  },
+  { nombre: 'CURIFOR-PLANTA LO BLANCO PORTAL CIA SEG', dmi: '365-4'   },
+];
+const RUT_CURIFOR = '92909000-4';
 function getMetaPV(suc, mes) { return (METAS.pv[suc] && METAS.pv[suc][mes]) || null; }
 function getMetaRepTotales(mes) {
   const h = METAS.repuestos.hyundai[mes]||0, j = METAS.repuestos.jac[mes]||0, e = METAS.repuestos.emergentes[mes]||0;
@@ -1419,7 +1428,7 @@ const app = (() => {
     if (name === 'metas') renderTabMetas();
     if (name === 'clearmechanic') { calcCM(); renderCMConsolidado(); }
     if (name === 'historico') renderHistorico();
-    if (name === 'pilar2') { renderSucursalesP2(); loadP2FormValues(); }
+    if (name === 'pilar2') { renderP2Table(); }
   }
 
   // ── Load form values from data ─────────────────────────────
@@ -1552,30 +1561,114 @@ const app = (() => {
     no.className = 'switch-btn' + (!val ? ' off' : '');
   }
 
-  // ── PILAR 2 ───────────────────────────────────────────────
-  function calcP2() {
-    // Usa la sucursal específica del tab DMI, no la global
-    const s = p2Sucursal || sucursal;
-    const d = getData(s, mes);
-    const num = (id) => { const v = parseFloat(document.getElementById(id)?.value); return isNaN(v) ? null : v; };
-    d.p2_cumpl      = num('p2_cumpl');
-    d.p2_vor_cargo  = num('p2_vor_cargo') || 0;
-    d.p2_facturacion = num('p2_facturacion');
-    setData(s, mes, d);
-    saveStore(store);
-
-    const r = pilar2Rebate(d.p2_cumpl);
-    const monto = (r !== null && d.p2_facturacion) ? d.p2_facturacion * r / 100 : null;
-    const neto = monto !== null ? monto - (d.p2_vor_cargo || 0) : null;
-
-    document.getElementById('p2-cumpl-badge').innerHTML = d.p2_cumpl !== null
-      ? badge(d.p2_cumpl + '%', d.p2_cumpl >= 100 ? 'verde' : 'rojo') : '—';
-    document.getElementById('p2-rebate').textContent = r !== null ? r + '%' : '—';
-    document.getElementById('p2-rebate').style.color = r > 0 ? 'var(--verde)' : 'var(--rojo)';
-    document.getElementById('p2-monto').textContent = fmtMoney(monto);
-    document.getElementById('p2-vor-desc').textContent = d.p2_vor_cargo > 0 ? '-' + fmtMoney(d.p2_vor_cargo) : '$0';
-    document.getElementById('p2-neto').textContent = fmtMoney(neto);
+  // ── PILAR 2 — Tabla completa por sucursal ────────────────
+  function getP2Table() {
+    if (!store.p2table) store.p2table = {};
+    if (!store.p2table[mes]) store.p2table[mes] = {};
+    return store.p2table[mes];
   }
+
+  function fmtNum(n) {
+    if (!n || n === 0) return '';
+    return Math.round(n).toLocaleString('es-CL');
+  }
+
+  function saveP2Cell(sucNombre, field, value) {
+    const table = getP2Table();
+    if (!table[sucNombre]) table[sucNombre] = { meta: 0, facturado: 0 };
+    table[sucNombre][field] = parseFloat(String(value).replace(/[^0-9.]/g,'')) || 0;
+    store.p2table[mes] = table;
+    saveStore(store);
+    renderP2Table();
+  }
+
+  function copiarMetasP2() {
+    // Copia las metas del mes anterior al mes actual
+    const [y, m] = mes.split('-').map(Number);
+    const prevMes = m === 1 ? (y-1)+'-12' : y+'-'+(m-1).toString().padStart(2,'0');
+    if (!store.p2table || !store.p2table[prevMes]) {
+      showToast('No hay datos del mes anterior para copiar.');
+      return;
+    }
+    if (!store.p2table[mes]) store.p2table[mes] = {};
+    DMI_SUCURSALES.forEach(suc => {
+      const prev = store.p2table[prevMes][suc.nombre];
+      if (prev && prev.meta) {
+        if (!store.p2table[mes][suc.nombre]) store.p2table[mes][suc.nombre] = { meta: 0, facturado: 0 };
+        store.p2table[mes][suc.nombre].meta = prev.meta;
+      }
+    });
+    saveStore(store);
+    renderP2Table();
+    showToast('Metas copiadas del mes anterior.');
+  }
+
+  function renderP2Table() {
+    const tbody = document.getElementById('dmi-tbody');
+    if (!tbody) return;
+    const table = getP2Table();
+
+    const mesLabel = document.getElementById('p2-mes-label');
+    const mesTh = document.getElementById('p2-th-mes');
+    const mParts = mes.split('-');
+    const mLabel = MESES_LABELS[parseInt(mParts[1])] + ' ' + mParts[0];
+    if (mesLabel) mesLabel.textContent = mLabel;
+    if (mesTh) mesTh.textContent = mLabel;
+
+    let totalMeta = 0, totalFact = 0;
+
+    const rows = DMI_SUCURSALES.map(suc => {
+      const row = table[suc.nombre] || { meta: 0, facturado: 0 };
+      const meta = row.meta || 0;
+      const fact = row.facturado || 0;
+      totalMeta += meta;
+      totalFact += fact;
+      const cumpl = meta > 0 ? (fact / meta * 100) : (fact > 0 ? 999 : 0);
+      let badgeStyle, badgeText;
+      if (fact === 0 && meta === 0) {
+        badgeStyle = 'background:#f0f0f0;color:#999';
+        badgeText = '—';
+      } else if (cumpl >= 100) {
+        badgeStyle = 'background:#c6f6d5;color:#276749';
+        badgeText = cumpl.toFixed(1) + '%';
+      } else {
+        badgeStyle = 'background:#fed7d7;color:#c53030';
+        badgeText = cumpl.toFixed(1) + '%';
+      }
+      const proyText = fact > 0 ? '$' + Math.round(fact).toLocaleString('es-CL') : '—';
+      return '<tr>' +
+        '<td style="padding:6px 10px;font-weight:500;white-space:nowrap">' + suc.nombre + '</td>' +
+        '<td style="padding:6px 8px;text-align:center;color:#888;font-size:0.78rem">' + RUT_CURIFOR + '</td>' +
+        '<td style="padding:6px 8px;text-align:center;color:#888;font-size:0.78rem">' + suc.dmi + '</td>' +
+        '<td style="padding:4px 6px"><input type="text" class="dmi-input" value="' + fmtNum(meta) + '"' +
+          ' onchange="app.saveP2Cell('' + suc.nombre + '','meta',this.value.replace(/[^0-9]/g,''))"' +
+          ' placeholder="0" /></td>' +
+        '<td style="padding:4px 6px"><input type="text" class="dmi-input" value="' + fmtNum(fact) + '"' +
+          ' onchange="app.saveP2Cell('' + suc.nombre + '','facturado',this.value.replace(/[^0-9]/g,''))"' +
+          ' placeholder="0" /></td>' +
+        '<td style="padding:6px 8px;text-align:right;color:#444">' + proyText + '</td>' +
+        '<td style="padding:6px 8px;text-align:center">' +
+          '<span class="cumpl-badge" style="' + badgeStyle + '">' + badgeText + '</span>' +
+        '</td>' +
+      '</tr>';
+    });
+
+    tbody.innerHTML = rows.join('');
+
+    const totalCumpl = totalMeta > 0 ? (totalFact / totalMeta * 100) : 0;
+    const totalStyle = totalCumpl >= 100 ? 'color:#276749' : (totalFact > 0 ? 'color:#c53030' : 'color:#999');
+    const fmt = (n) => n > 0 ? '$' + Math.round(n).toLocaleString('es-CL') : '—';
+    const el = (id) => document.getElementById(id);
+    if (el('dmi-total-meta')) el('dmi-total-meta').textContent = fmt(totalMeta);
+    if (el('dmi-total-fact')) el('dmi-total-fact').textContent = fmt(totalFact);
+    if (el('dmi-total-proy')) el('dmi-total-proy').textContent = fmt(totalFact);
+    if (el('dmi-total-cumpl')) {
+      el('dmi-total-cumpl').textContent = totalMeta > 0 ? totalCumpl.toFixed(1) + '%' : '—';
+      el('dmi-total-cumpl').setAttribute('style', 'padding:8px 10px;text-align:center;font-size:1rem;font-weight:700;' + totalStyle);
+    }
+  }
+
+  function calcP2() { renderP2Table(); }
 
   // ── PILAR 3 ───────────────────────────────────────────────
   function calcP3() {
@@ -2138,7 +2231,7 @@ const app = (() => {
     calcP2();
   }
 
-  function cambiarMes(m) { mes = m; loadFormValues(); renderDashboard(); if (currentTab==='metas') renderTabMetas(); if (currentTab==='clearmechanic') { calcCM(); renderCMConsolidado(); } if (currentTab==='historico') renderHistorico(); }
+  function cambiarMes(m) { mes = m; loadFormValues(); renderDashboard(); if (currentTab==='metas') renderTabMetas(); if (currentTab==='clearmechanic') { calcCM(); renderCMConsolidado(); } if (currentTab==='historico') renderHistorico(); if (currentTab==='pilar2') renderP2Table(); }
   function guardarDatos() { collectForm(); saveStore(store); showToast('✓ Guardado · sincronizando con equipo...'); }
 
   function showToast(msg) {
@@ -2171,7 +2264,7 @@ const app = (() => {
 
   return { setTab, cambiarSucursal, cambiarMes, guardarDatos, calcP1, calcP1PVReal, calcP2, calcP3, calcP4, calcSC, calcCap,
     calcCM, renderCMConsolidado, renderTabMetas, setLlave, openModalSucursal, closeModalSucursal, agregarSucursal,
-    renderHistorico, cambiarSucursalP2, init };
+    renderHistorico, cambiarSucursalP2, saveP2Cell, copiarMetasP2, init };
 })();
 
 // ── LOGIN ─────────────────────────────────────────────────
